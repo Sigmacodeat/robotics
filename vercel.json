@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "framework": "nextjs",
+  "installCommand": "cd businessplan-site && pnpm install --frozen-lockfile",
+  "buildCommand": "cd businessplan-site && pnpm build",
+  "git": {
+    "deploymentEnabled": {
+      "main": true
+    }
+  }
+}
