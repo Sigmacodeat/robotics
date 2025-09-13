@@ -1,2 +1,2 @@
 # businessplan
-Businessplan Sigmacode.ao
+Businessplan Sigmacode.ai
