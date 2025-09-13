@@ -1,0 +1,23 @@
+@media print {
+  body {
+    padding: 20px;
+    font-size: 12pt;
+  }
+  
+  .no-print {
+    display: none !important;
+  }
+  
+  .page-break {
+    page-break-after: always;
+  }
+  
+  /* Kapitel-spezifische Druckoptimierungen */
+  .prose {
+    max-width: 100% !important;
+  }
+  
+  section {
+    break-inside: avoid;
+  }
+}

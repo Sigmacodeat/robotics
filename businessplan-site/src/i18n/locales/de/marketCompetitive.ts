@@ -1,0 +1,103 @@
+const marketCompetitive = {
+  // Vergleichsmatrix (humanoide Robotik – komprimiert)
+  matrix: {
+    headers: [
+      "Plattform",
+      "Modell",
+      "DOF/Payload",
+      "SDK/ROS2",
+      "Autonomie",
+      "Preis (Kauf)",
+      "CE/ISO"
+    ],
+    rows: [
+      ["Tesla", "Optimus", "n/a (Industrie‑Tasks)", "SDK: geschlossen (tbd)", "Industrie/Alltag (Ziel)", "tbd (Kauf)", "CE/ISO: tbd"],
+      ["Figure", "02", "~20kg payload", "SDK: tbd", "5h, 1.2 m/s", "tbd (Kauf)", "CE/ISO: tbd"],
+      ["Agility Robotics", "Digit", "~20kg payload", "ROS2: teilweise", "Indoor/Logistik", "Kauf (CAPEX)", "CE in Arbeit"],
+      ["PAL Robotics", "ARI/TIAGo+", "armbezogen", "ROS/ROS2", "Service/Research", "Kauf", "CE vorhanden"],
+      ["SIGMACODE AI", "Plattform", "n/a", "ROS2 + SDK", "Fleet‑/App‑Store", "RaaS/License", "ISO/CE‑Pfad"],
+    ],
+  },
+  // Quellen/Referenzen für Overview/PESTEL (indikativ)
+  overviewSources: [
+    'NVIDIA Isaac Sim / Omniverse – https://developer.nvidia.com/isaac-sim',
+    'ROS 2 (Robot Operating System) – https://docs.ros.org/en/rolling/',
+    'Gazebo (Simulation) – https://gazebosim.org/home',
+    'EU AI Act – https://artificialintelligenceact.eu/ (Infosammlung)',
+    'OpenAI × Figure (Humanoid collaboration) – https://figure.ai/',
+  ],
+  // Kurze Positionierung (Moat)
+  positioning: [
+    "Offener, modularer Stack mit App‑Store & SDK",
+    "Policy‑Hub & Fleet‑Learning als Safety/Compliance‑Moat",
+    "Enterprise‑fähige Integrationen & Observability",
+  ],
+  // Überblick (High‑Level‑Notizen für Seite)
+  overview: [
+    "Humanoide Hardware entwickelt sich rasant; Software/Ökosysteme sind Engpass.",
+    "SIGMACODE AI abstrahiert Hardware per ROS2/Adapter, liefert App‑Store & Fleet‑Rollouts.",
+    "Differenzierung über Safety/Compliance, Tele‑Assist, Observability & SDK.",
+    "Stand der Technik: Foundation‑Modelle (VLA/RT‑Rekursive Planner) + ROS2/Isaac‑Stacks konsolidieren sich.",
+    "Sim‑to‑Real: Isaac Sim/Omniverse & Gazebo beschleunigen Skill‑Training und Validierung.",
+    "Safety/AI‑Act: Policy‑Engines, Audits, CE‑Pfad werden zum Wettbewerbsfaktor (Trust‑Vorteil in EU).",
+    "Telemetry/Observability: Flotten‑weit Metrics/Logs/Video‑Events als Standard für Betrieb & QA.",
+    "App‑Ökosysteme: Marktplätze mit Rev‑Share treiben Drittanbieter‑Skills und schnellere Adoption.",
+  ],
+  // Listen werden in der Markt-Seite gerendert (bp.marketCompetitive.hardware/software)
+  hardware: [
+    "Tesla – Optimus: humanoid; Industrie/Alltag (Ziel); Quelle: https://www.tesla.com/",
+    "Figure – 02: humanoid; ~20kg Payload, 1.2 m/s, 5h; Kollaboration mit OpenAI; Quelle: https://figure.ai/",
+    "Agility – Digit: zweibeiniger Logistik‑Fokus; ~20kg Payload; ROS2 teilweise; Kauf (CAPEX); Quelle: https://agilityrobotics.com/",
+    "PAL Robotics – ARI/TIAGo+: Forschung/Service; ROS/ROS2; Quelle: https://pal-robotics.com/",
+  ],
+  software: [
+    "Figure / OpenAI: KI‑Robotik Kollaboration; Quelle: https://figure.ai/",
+    "NVIDIA Isaac / ROS2: Sim/Perception/Navigation Stack; Quelle: https://developer.nvidia.com/isaac",
+    "Open‑Source – MoveIt/ROS2 Navigation2: Manipulation/Navigation; Quelle: https://moveit.ros.org/",
+  ],
+  // Technische Spezifikationen (konservativ, mit Quellen)
+  specsHeaders: [
+    "Modell",
+    "Höhe",
+    "Gewicht",
+    "Payload",
+    "Speed",
+    "Runtime",
+    "Energie",
+    "Quelle"
+  ],
+  specsRows: [
+    [
+      "Figure 02",
+      "1,68 m (5'6\")",
+      "70 kg",
+      "20 kg",
+      "1,2 m/s",
+      "~5 h",
+      "Elektrisch",
+      "https://figure.ai/"
+    ],
+    [
+      "Agility Digit",
+      "1,75 m (5'9\")",
+      "~65 kg",
+      "~16 kg (35 lbs)",
+      "tbd",
+      "tbd",
+      "Elektrisch",
+      "https://www.agilityrobotics.com/products"
+    ],
+    [
+      "Tesla Optimus",
+      "~1,73 m (indikativ)",
+      "~60–70 kg (Gen2 leichter)",
+      "~20 kg",
+      "~8 km/h (indikativ)",
+      "tbd",
+      "Elektrisch",
+      "https://en.wikipedia.org/wiki/Optimus_(robot); https://humanoid.guide/product/optimus-gen2/; https://www.robotics247.com/article/tesla_reveals_gen_2_of_the_optimus_humanoid_robot"
+    ],
+  ],
+} as const;
+
+export default marketCompetitive;

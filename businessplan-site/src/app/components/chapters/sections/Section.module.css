@@ -1,0 +1,23 @@
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .headingAppear,
+  .contentAppear { animation: none !important; }
+}
+
+.headingAppear {
+  animation: fadeIn 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.contentAppear {
+  animation: fadeInUp 360ms cubic-bezier(0.22, 1, 0.36, 1) 40ms both;
+}

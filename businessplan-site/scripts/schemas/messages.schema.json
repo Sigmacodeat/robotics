@@ -1,0 +1,104 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://example.com/i18n/messages.schema.json",
+  "title": "Businessplan Messages Schema",
+  "type": "object",
+  "required": ["bp", "cv"],
+  "additionalProperties": true,
+  "properties": {
+    "bp": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "riskExit": {
+      "anyOf": [
+        {
+          "type": "object",
+          "required": ["exit"],
+          "properties": {
+            "exit": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          },
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "properties": {
+            "de": {
+              "type": "object",
+              "properties": {
+                "exit": { "type": "array", "items": { "type": "string" } }
+              }
+            },
+            "en": {
+              "type": "object",
+              "properties": {
+                "exit": { "type": "array", "items": { "type": "string" } }
+              }
+            }
+          },
+          "additionalProperties": true
+        }
+      ]
+    },
+    "cv": {
+      "anyOf": [
+        {
+          "type": "object",
+          "required": ["pageTitle", "pageSubtitle", "title", "noDetails", "items"],
+          "properties": {
+            "pageTitle": { "type": "string" },
+            "pageSubtitle": { "type": "string" },
+            "title": { "type": "string" },
+            "noDetails": { "type": "string" },
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["period", "title", "subtitle", "bullets"],
+                "properties": {
+                  "period": { "type": "string" },
+                  "title": { "type": "string" },
+                  "subtitle": { "type": "string" },
+                  "bullets": { "type": "array", "items": { "type": "string" } }
+                },
+                "additionalProperties": true
+              }
+            }
+          },
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "properties": {
+            "de": {
+              "type": "object",
+              "properties": {
+                "pageTitle": { "type": "string" },
+                "pageSubtitle": { "type": "string" },
+                "title": { "type": "string" },
+                "noDetails": { "type": "string" },
+                "items": { "type": "array", "items": { "type": "object" } }
+              },
+              "additionalProperties": true
+            },
+            "en": {
+              "type": "object",
+              "properties": {
+                "pageTitle": { "type": "string" },
+                "pageSubtitle": { "type": "string" },
+                "title": { "type": "string" },
+                "noDetails": { "type": "string" },
+                "items": { "type": "array", "items": { "type": "object" } }
+              },
+              "additionalProperties": true
+            }
+          },
+          "additionalProperties": true
+        }
+      ]
+    }
+  }
+}

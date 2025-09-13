@@ -1,0 +1,857 @@
+import type { Metadata } from 'next';
+import { getLocale, getTranslations } from 'next-intl/server';
+import { getMessages } from '@/i18n/messages';
+import { chapters } from '../chapters.config';
+import { buildLocalePath } from '@/i18n/path';
+import RevenueMixChart from './RevenueMixChart';
+import MultiLineEuroChartClient from './MultiLineEuroChartClient';
+import WaterfallEuroChartClient from './WaterfallEuroChartClient';
+import TableSimple from '@/components/ui/TableSimple';
+import SectionDelay from '@/components/animation/SectionDelay';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import CountUp from '@/components/charts/CountUp';
+import { CheckCircle2, TrendingUp, BarChart3, CircleDollarSign } from 'lucide-react';
+import MiniSparkline from '@/components/charts/MiniSparkline';
+import MiniBar from '@/components/charts/MiniBar';
+import { KPI_ANIM_DURATION, KPI_BAR_HEIGHT, KPI_SPARK_HEIGHT, getKpiDelay, COUNTUP_DURATION_MS, getCountUpDelayMs } from '@/components/charts/kpiAnimation';
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  const index = Math.max(0, chapters.findIndex((c) => c.slug === 'finance')) + 1;
+  return {
+    robots: { index: false, follow: true },
+    alternates: { canonical: buildLocalePath(locale, `/chapters/${index}`) },
+  };
+}
+
+
+export default async function FinancePage() {
+  const locale = await getLocale();
+  const tBp = await getTranslations('bp');
+  const tFin = await getTranslations('finance');
+  const chapterIndex = Math.max(0, chapters.findIndex((c) => c.slug === 'finance')) + 1;
+  const chapterTitle = `${locale.startsWith('de') ? 'Kapitel' : 'Chapter'} ${chapterIndex} – ${tBp('sections.finance')}`;
+  // Einheitliche Unterkapitel-Nummerierung (nicht verwendet)
+
+  const { bp } = await getMessages(locale.startsWith('de') ? 'de' : 'en');
+  const bpAny = bp as any;
+  const messages: any = { bp: bpAny, content: (bpAny as any).content ?? {} };
+  const fin = (bpAny?.finance as any) ?? {};
+  const financeIntro: string | undefined = typeof bpAny?.financeIntro === 'string' ? (bpAny.financeIntro as string) : undefined;
+
+  // Revenue by stream (lokalisierte content.finance bevorzugen, Fallback i18n finance.revenueComposition)
+  const revBy = (messages?.content?.finance?.revenueByStream as { labels?: Array<string|number>; series?: Array<{ name: string; values: number[] }>; } | undefined)
+    ?? (fin?.revenueByStream as { labels?: Array<string|number>; series?: Array<{ name: string; values: number[] }>; } | undefined);
+  let revLabels: Array<string|number> = Array.isArray(revBy?.labels) ? revBy!.labels! : [];
+  let revSeries: Array<{ name: string; values: number[] }> = Array.isArray(revBy?.series)
+    ? revBy!.series!.map((s: any) => ({ name: String(s?.name ?? ''), values: Array.isArray(s?.values) ? s.values.map(Number) : [] }))
+    : [];
+  // Fallback zu i18n finance.revenueComposition
+  if (revLabels.length === 0 || revSeries.length === 0) {
+    try {
+      const rc = tFin.raw('revenueComposition') as unknown as { labels?: Array<string|number>; series?: Array<{ name: string; color?: string; values: number[] }> } | undefined;
+      if (rc && Array.isArray(rc.labels) && Array.isArray(rc.series)) {
+        revLabels = rc.labels;
+        revSeries = rc.series.map((s) => ({ name: String((s as any).name ?? ''), values: Array.isArray(s.values) ? s.values.map(Number) : [] }));
+      }
+    } catch {}
+  }
+  const total = revLabels.map((_, idx) => revSeries.reduce((sum, s) => sum + (Number(s.values[idx] ?? 0)), 0));
+  const revenueNarrative: string | undefined = (messages?.content?.finance?.revenueNarrative as string | undefined)
+    ?? (messages?.bp?.finance?.revenueNarrative as string | undefined);
+
+  // Optional: Annahmenliste (finance.assumptions) aus i18n – nur anzeigen, wenn vorhanden
+  const finAssumptions: string[] = (() => {
+    try {
+      const raw = tFin.raw('assumptions') as unknown;
+      return Array.isArray(raw) ? (raw as string[]) : [];
+    } catch { return []; }
+  })();
+  // Optional: Annahmentabelle (finance.assumptionsTable) aus i18n – nur anzeigen, wenn vorhanden
+  const finAssumptionsTable: { headers?: string[]; rows?: (string|number)[][] } = (() => {
+    try {
+      const raw = tFin.raw('assumptionsTable') as any;
+      const headers = Array.isArray(raw?.headers) ? raw.headers as string[] : [];
+      const rows = Array.isArray(raw?.rows) ? raw.rows as (string|number)[][] : [];
+      return { headers, rows };
+    } catch { return { headers: [], rows: [] }; }
+  })();
+
+  // Hinweis: Formatter werden in Client-Wrappern gekapselt, damit keine Funktionen von Server zu Client gereicht werden
+
+  // Branding-Palette für Charts
+  const brandPalette = [
+    'var(--color-emerald-500)',
+    'var(--color-rose-500)',
+    'var(--color-sky-500)',
+    'var(--color-violet-500)',
+    'var(--color-amber-500)',
+    'var(--color-teal-500)'
+  ];
+
+  // Nummernformatierer (lokal), ohne Nachkommastellen
+  const nf = new Intl.NumberFormat(locale.startsWith('de') ? 'de' : 'en', { maximumFractionDigits: 0 });
+
+  // Lokalisierte Seriennamen
+  const sRevenue = tBp('series.revenue');
+  const sCosts = tBp('series.costs');
+  const sOperating = tBp('series.operating');
+  const sInvesting = tBp('series.investing');
+  const sFinancing = tBp('series.financing');
+
+  // Helper: parse KPI display strings (e.g., "€40+ Mrd", "45–60%", "€25–40 Mio", "2028") to CountUp props
+  // For ranges like 25–40 or 45-60%, we animate to the mean value
+  const parseKpiValue = (raw: string): { to: number; prefix?: string; suffix?: string; decimals?: number } => {
+    const s = String(raw).trim();
+    let prefix = '';
+    let suffix = '';
+    let decimals = 0;
+    // Detect ranges first (supports hyphen '-' or en dash '–')
+    const rangeMatch = s.match(/([0-9]+(?:[.,][0-9]+)?)\s*[–-]\s*([0-9]+(?:[.,][0-9]+)?)/);
+    // Percent
+    const percentMatch = s.match(/([0-9]+(?:[.,][0-9]+)?)\s*%/);
+    if (percentMatch) {
+      if (rangeMatch) {
+        const a = parseFloat(rangeMatch[1].replace(',', '.'));
+        const b = parseFloat(rangeMatch[2].replace(',', '.'));
+        const mean = (a + b) / 2;
+        return { to: mean, suffix: '%', decimals };
+      }
+      const num = parseFloat(percentMatch[1].replace(',', '.'));
+      return { to: num, suffix: '%', decimals };
+    }
+    // Euro amounts with Mio/Mrd and optional plus sign or range
+    if (s.includes('€')) {
+      prefix = '€';
+      const isMio = /Mio/.test(s);
+      const isMrd = /Mrd/.test(s);
+      const hasPlus = /\+/.test(s);
+      if (isMio) suffix = `${hasPlus ? '+' : ''} Mio`;
+      else if (isMrd) suffix = `${hasPlus ? '+' : ''} Mrd`;
+      else if (hasPlus) suffix = '+';
+      // If range present, use mean; else use last number
+      if (rangeMatch) {
+        const a = parseFloat(rangeMatch[1].replace(',', '.'));
+        const b = parseFloat(rangeMatch[2].replace(',', '.'));
+        const mean = (a + b) / 2;
+        decimals = /[.,]/.test(rangeMatch[1]) || /[.,]/.test(rangeMatch[2]) ? 1 : 0;
+        return { to: mean, prefix, suffix: suffix.trim() ? ` ${suffix.trim()}` : '', decimals };
+      }
+      const lastNumberMatch = s.match(/([0-9]+(?:[.,][0-9]+)?)(?!.*[0-9])/);
+      const num = lastNumberMatch ? parseFloat(lastNumberMatch[1].replace(',', '.')) : 0;
+      decimals = /[.,]/.test(lastNumberMatch?.[1] ?? '') ? 1 : 0;
+      return { to: num, prefix, suffix: suffix.trim() ? ` ${suffix.trim()}` : '', decimals };
+    }
+    // Pure year or number
+    const yearMatch = s.match(/\b(20[0-9]{2}|19[0-9]{2})\b/);
+    if (yearMatch) {
+      return { to: parseInt(yearMatch[1], 10) };
+    }
+    const anyRange = rangeMatch;
+    if (anyRange) {
+      const a = parseFloat(anyRange[1].replace(',', '.'));
+      const b = parseFloat(anyRange[2].replace(',', '.'));
+      const mean = (a + b) / 2;
+      decimals = /[.,]/.test(anyRange[1]) || /[.,]/.test(anyRange[2]) ? 1 : 0;
+      return { to: mean, decimals };
+    }
+    const anyNumber = s.match(/([0-9]+(?:[.,][0-9]+)?)/);
+    if (anyNumber) {
+      const num = parseFloat(anyNumber[1].replace(',', '.'));
+      decimals = /[.,]/.test(anyNumber[1]) ? 1 : 0;
+      return { to: num, decimals };
+    }
+    return { to: 0 };
+  };
+
+  // Revenue vs Costs (multi-line)
+  const revCostMsg = (messages?.content?.finance?.revenueVsCost as any) ?? (messages?.bp?.finance?.revenueVsCost as any);
+  const revCostSeries = (() => {
+    try {
+      const toPoints = (arr: any[]) =>
+        Array.isArray(arr)
+          ? arr.map((it: any) => ({ label: (it?.label ?? it?.[0]) as string | number, value: Number(it?.value ?? it?.[1] ?? 0) }))
+          : [];
+      const revenue = toPoints(revCostMsg?.revenue ?? []);
+      const costs = toPoints(revCostMsg?.costs ?? []);
+      const series = [
+        { name: sRevenue, color: brandPalette[0], points: revenue },
+        { name: sCosts, color: brandPalette[1], points: costs },
+      ];
+      return series.filter((s) => Array.isArray(s.points) && s.points.length > 0);
+    } catch { return [] as any[]; }
+  })();
+
+  // Break-even (single-line) – prefer localized content, fallback to bp.tables.finance.breakEven
+  const beMsg = (messages?.content?.finance?.breakEven as any) ?? (messages?.bp?.tables?.finance?.breakEven as any) ?? [];
+  const breakEvenSeries = (() => {
+    try {
+      const points = Array.isArray(beMsg)
+        ? beMsg.map((it: any) => ({ label: (it?.label ?? it?.[0]) as string | number, value: Number(it?.value ?? it?.[1] ?? 0) }))
+        : [];
+      return points.length > 0
+        ? [{ name: tBp('headings.breakEven', { defaultMessage: 'Break-even' }) as string, color: brandPalette[5], points }]
+        : [];
+    } catch { return [] as any[]; }
+  })();
+
+  // Cash Flow (operating/investing/financing) as multi-line
+  const cashFlowMsg = (messages?.content?.finance?.cashFlow as any) ?? (messages?.bp?.finance?.cashFlow as any);
+  const cashFlowSeries = (() => {
+    try {
+      const toPoints = (arr: any[]) =>
+        Array.isArray(arr)
+          ? arr.map((it: any) => ({ label: (it?.label ?? it?.[0]) as string | number, value: Number(it?.value ?? it?.[1] ?? 0) }))
+          : [];
+      const operating = toPoints(cashFlowMsg?.operating ?? []);
+      const investing = toPoints(cashFlowMsg?.investing ?? []);
+      const financing = toPoints(cashFlowMsg?.financing ?? []);
+      const series = [
+        { name: sOperating, color: brandPalette[2], points: operating },
+        { name: sInvesting, color: brandPalette[3], points: investing },
+        { name: sFinancing, color: brandPalette[4], points: financing },
+      ];
+      return series.filter((s) => Array.isArray(s.points) && s.points.length > 0);
+    } catch { return [] as any[]; }
+  })();
+
+  // Profit Bridge (waterfall)
+  const profitBridgeSteps = ((): { label: string | number; value: number; type?: string; color?: string }[] => {
+    try {
+      const steps = (messages?.content?.finance?.profitBridgeSteps ?? messages?.bp?.finance?.profitBridgeSteps) as any[] | undefined;
+      return Array.isArray(steps) ? steps.map((s) => ({
+        label: (s?.label ?? s?.[0]) as string | number,
+        value: Number(s?.value ?? s?.[1] ?? 0),
+        type: typeof s?.type === 'string' ? s.type : undefined,
+        color: typeof s?.color === 'string' ? s.color : undefined,
+      })) : [];
+    } catch { return []; }
+  })();
+
+  // Use of Funds (Years)
+  const uof = fin?.useOfFundsYears as { headers?: string[]; rows?: (string|number)[][] } | undefined;
+  const uofHeaders = Array.isArray(uof?.headers) ? uof.headers! : [];
+  const uofRows = Array.isArray(uof?.rows) ? uof.rows! : [];
+
+  // EBITDA by year
+  const ebitda = (messages?.financePlanDetailed?.ebitdaByYear as any) ?? {};
+  const ebitdaHeaders = Array.isArray(ebitda?.headers) ? ebitda.headers : [];
+  const ebitdaRows = Array.isArray(ebitda?.rows) ? ebitda.rows : [];
+  const ebitdaTitle = String(ebitda?.title ?? (locale.startsWith('de') ? 'EBITDA nach Jahr' : 'EBITDA by year'));
+
+  // CAPEX/OPEX (detailliert) aus financePlanDetailed
+  const capexOpex = (messages?.financePlanDetailed?.capexOpex as any) ?? {};
+  const capexRows: (string|number)[][] = Array.isArray(capexOpex?.CAPEX) ? capexOpex.CAPEX as (string|number)[][] : [];
+  const opexRows: (string|number)[][] = Array.isArray(capexOpex?.OPEX) ? capexOpex.OPEX as (string|number)[][] : [];
+  const capexOpexHeaders = [tBp('tables.headers.category'), tBp('tables.headers.amount')];
+
+  // Hardware-Breakdown aus costPlan
+  const hardwareBreakdown = (messages?.costPlan?.hardwareBreakdown as any) ?? {};
+  const hwHeaders: string[] = Array.isArray(hardwareBreakdown?.headers) ? hardwareBreakdown.headers as string[] : [];
+  const hwRows: (string|number)[][] = Array.isArray(hardwareBreakdown?.rows) ? hardwareBreakdown.rows as (string|number)[][] : [];
+  const hwTitle: string = typeof hardwareBreakdown?.title === 'string' ? hardwareBreakdown.title as string : (locale.startsWith('de') ? 'Hardware‑Details (k€)' : 'Hardware details (k€)');
+
+  
+
+  return (
+    <div className="space-y-6">
+      <div className="prose prose-sm max-w-none [font-feature-settings:'ss01','ss02','liga','clig','tnum']">
+        <h1 className="section-title font-semibold tracking-tight leading-tight text-[--color-foreground-strong] text-[clamp(18px,2vw,22px)]">
+          {chapterTitle}
+        </h1>
+        {financeIntro ? (
+          <p className="mt-2 text-[13px] md:text-[14px] leading-relaxed text-[--color-foreground] opacity-90">
+            {financeIntro}
+          </p>
+        ) : null}
+
+        {/* KPI Cards (dezent & edel) – vereinheitlichte kpi-card Optik wie Kap. 1/2 */}
+        <SectionDelay delayMs={0}>
+          <div className="not-prose mt-4 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4 items-stretch">
+            {[
+              { id: 'market2030', t: tBp('kpis.market2030'), v: tBp('kpisValues.market2030'), s: tBp('kpisSub.market2030') },
+              { id: 'breakEven', t: tBp('kpis.breakEven'), v: tBp('kpisValues.breakEvenYear'), s: tBp('kpisSub.breakEven') },
+              { id: 'cagr', t: tBp('kpis.cagr'), v: tBp('kpisValues.cagr'), s: tBp('kpisSub.cagr') },
+              { id: 'revenue2030', t: tBp('kpis.revenue2030'), v: tBp('kpisValues.revenue2030'), s: tBp('kpisSub.revenue2030') },
+            ].map((k, i) => (
+              <div key={i} className="h-full">
+                <Card className="kpi-card kpi-card--hairline h-full bg-transparent shadow-none">
+                  <div className="kpi-card kpi-card--bm relative h-full rounded-2xl">
+                    <div className="kpi-card-content p-3 md:p-3.5 pb-4 md:pb-5">
+                      <div className="flex items-center gap-2 text-[10px] md:text-[11px] font-medium tracking-wide uppercase mb-2 text-[--color-foreground] dark:text-white">
+                        {(() => {
+                          const Icon = k.id === 'market2030' ? TrendingUp : k.id === 'cagr' ? BarChart3 : k.id === 'revenue2030' ? CircleDollarSign : CheckCircle2;
+                          return <Icon className="h-3.5 w-3.5 text-[--color-foreground-muted]" aria-hidden />;
+                        })()}
+                        <span>{k.t as unknown as string}</span>
+                      </div>
+                      {/* Visual-Slot: kleine Sparklines/Bars für Konsistenz */}
+                      <div className="mb-2.5 kpi-visual">
+                        {k.id === 'cagr' ? (
+                          <MiniBar
+                            data={[10, 18, 27, 35, 53]}
+                            height={KPI_BAR_HEIGHT}
+                            color={'var(--color-amber-500)'}
+                            bg={'rgba(245,158,11,0.12)'}
+                            delay={getKpiDelay(i)}
+                            duration={KPI_ANIM_DURATION}
+                            className="w-full"
+                          />
+                        ) : k.id === 'market2030' ? (
+                          <MiniSparkline
+                            data={[28, 32, 36, 40, 44]}
+                            height={KPI_SPARK_HEIGHT}
+                            delay={getKpiDelay(i)}
+                            duration={KPI_ANIM_DURATION}
+                            className="w-full"
+                            colorStart={'var(--color-emerald-500)'}
+                            colorEnd={'var(--color-sky-500)'}
+                            showArea={false}
+                            showDot
+                          />
+                        ) : k.id === 'revenue2030' ? (
+                          <MiniSparkline
+                            data={[18, 22, 27, 33, 38]}
+                            height={KPI_SPARK_HEIGHT}
+                            delay={getKpiDelay(i)}
+                            duration={KPI_ANIM_DURATION}
+                            className="w-full"
+                            colorStart={'var(--color-sky-500)'}
+                            colorEnd={'var(--color-violet-500)'}
+                            showArea={false}
+                            showDot
+                          />
+                        ) : (
+                          <div className="h-[18px]" />
+                        )}
+                      </div>
+                      <div className="text-center space-y-1">
+                        <div className="kpi-value-row font-bold text-slate-900 dark:text-white [font-feature-settings:'tnum'] [font-variant-numeric:tabular-nums] kpi-value">
+                          {(() => {
+                            const raw = String(k.v);
+                            const { to, prefix, suffix, decimals } = parseKpiValue(raw);
+                            const durationMs = COUNTUP_DURATION_MS;
+                            const delayMs = getCountUpDelayMs(i);
+                            // Jahr erkennen (reine 4-stellige Jahreszahl) und Gruppierung deaktivieren
+                            const isPureYear = /^\s*(?:19|20)\d{2}\s*$/.test(raw);
+                            return (
+                              <span className="whitespace-normal break-words leading-tight" title={raw}>
+                                <CountUp
+                                  to={to}
+                                  durationMs={durationMs}
+                                  delayMs={delayMs}
+                                  prefix={prefix ?? ''}
+                                  suffix={suffix ?? ''}
+                                  decimals={decimals ?? 0}
+                                  locale={locale.startsWith('de') ? 'de-DE' : 'en-US'}
+                                  useGrouping={!isPureYear}
+                                />
+                              </span>
+                            );
+                          })()}
+                        </div>
+                        <div className="kpi-sub one-line" title={k.s as unknown as string}>
+                          {k.s as unknown as string}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              </div>
+            ))}
+          </div>
+          {/* KPI-Badges unter den Karten – harmonisiert mit Kapitel 1 */}
+          {(() => {
+            try {
+              const de = locale.startsWith('de');
+              const mv: any = (messages?.bp?.market?.volume ?? {});
+              const svcCagr = typeof mv?.service?.cagr === 'string' ? mv.service.cagr : undefined;
+              const humCagr = typeof mv?.humanoid?.cagr === 'string' ? mv.humanoid.cagr : undefined;
+              const cagrService = svcCagr ? (de ? `CAGR (Service): ${svcCagr}` : `CAGR (Service): ${svcCagr}`) : (de ? 'CAGR (Service): ~16%' : 'CAGR (Service): ~16%');
+              const cagrHumanoid = humCagr ? (de ? `CAGR (Humanoide): ${humCagr}` : `CAGR (Humanoids): ${humCagr}`) : (de ? 'CAGR (Humanoide): ~39%' : 'CAGR (Humanoids): ~39%');
+              const rev2030Raw = (messages?.bp?.execFacts?.revenue2030 as string | undefined);
+              const revBadge = (() => {
+                if (!rev2030Raw) return de ? 'Umsatz 2030: €25–40 Mio' : 'Revenue 2030: €25–40M';
+                const cleaned = rev2030Raw
+                  .replace(/Umsatz\s*2030:\s*/i, '')
+                  .replace(/Revenue\s*2030:\s*/i, '')
+                  .trim();
+                return `${cleaned} (2030)`;
+              })();
+              const appStoreShare = de ? 'App‑Store Split: 30%/70% (Plattform/Entwickler)' : 'App‑store split: 30%/70% (platform/developers)';
+              const badges = [
+                cagrService,
+                cagrHumanoid,
+                de ? 'Break-even 2028' : 'Break-even 2028',
+                revBadge,
+                appStoreShare,
+                de ? 'EU AI Act & DSGVO Ready' : 'EU AI Act & GDPR Ready',
+                de ? 'RaaS (Robots-as-a-Service)' : 'RaaS (Robots-as-a-Service)'
+              ];
+              return (
+                <div className="not-prose mt-3 md:mt-4 flex flex-wrap items-center justify-center gap-2.5">
+                  {badges.map((k, i) => (
+                    <span key={`${i}-${k || 'badge'}`} className="badge leading-none hover:bg-[--muted]/22 transition-colors">
+                      {k}
+                    </span>
+                  ))}
+                </div>
+              );
+            } catch {
+              return null;
+            }
+          })()}
+        </SectionDelay>
+
+        {/* Break-even */}
+        {breakEvenSeries.length > 0 && (
+          <SectionDelay delayMs={400}>
+            <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
+              <CardHeader className="border-b-0 p-2.5">
+                <CardTitle title={locale.startsWith('de') ? 'Indikativ, interne Planung' : 'Indicative, internal planning'} className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+                  {`${chapterIndex}.1 – ${tBp('headings.breakEven') as string}`}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-2.5 pt-1.5 md:pt-2.5 pb-5">
+                {(() => {
+                  const desc = tBp('figures.breakEvenDescription');
+                  return desc ? (
+                    <p className="mt-1.5 md:mt-2 text-sm leading-relaxed text-[--color-foreground-muted]">{desc as unknown as string}</p>
+                  ) : null;
+                })()}
+                <div className="mt-2.5 flex justify-center pb-5">
+                  <MultiLineEuroChartClient
+                    series={breakEvenSeries as any}
+                    ariaLabel={tBp('headings.breakEven') as string}
+                    responsive
+                    height={260}
+                    locale={locale}
+                    yTicksCount={5}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </SectionDelay>
+        )}
+
+        {/* Use of Funds (Years) */}
+        {uofHeaders.length > 0 && uofRows.length > 0 && (
+          <SectionDelay delayMs={900}>
+            <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
+              <CardHeader className="border-b-0 p-2.5">
+                <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+                  {`${chapterIndex}.2 – ${tBp('headings.useOfFunds') as string}`}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-2.5 pt-1.5 md:pt-2.5 pb-5">
+                <TableSimple
+                  headers={uofHeaders}
+                  rows={uofRows}
+                  animateRows
+                  stagger={0.03}
+                  zebra
+                  denseRows
+                  emphasizeFirstCol
+                />
+              </CardContent>
+            </Card>
+          </SectionDelay>
+        )}
+
+        {/* CAPEX / OPEX (detailliert) */}
+        {(capexRows.length > 0 || opexRows.length > 0) && (
+          <SectionDelay delayMs={1200}>
+            <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
+              <CardHeader className="border-b-0 p-2.5">
+                <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+                  {`${chapterIndex}.3 – ${tBp('headings.capexOpex') as string}`}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-2.5 pt-1.5 md:pt-2.5 pb-5">
+                <div className="grid gap-3 md:grid-cols-2">
+                  {capexRows.length > 0 && (
+                    <div>
+                      <h4 className="text-[13px] md:text-[14px] font-medium mb-1 text-[--color-foreground]">CAPEX</h4>
+                      <TableSimple headers={capexOpexHeaders} rows={capexRows} animateRows stagger={0.03} zebra denseRows emphasizeFirstCol />
+                    </div>
+                  )}
+                  {opexRows.length > 0 && (
+                    <div>
+                      <h4 className="text-[13px] md:text-[14px] font-medium mb-1 text-[--color-foreground]">OPEX</h4>
+                      <TableSimple headers={capexOpexHeaders} rows={opexRows} animateRows stagger={0.03} zebra denseRows emphasizeFirstCol />
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </SectionDelay>
+        )}
+
+        {/* Hardware‑Breakdown (Cost Plan) */}
+        {hwRows.length > 0 && (
+          <SectionDelay delayMs={1600}>
+            <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
+              <CardHeader className="border-b-0 p-2.5">
+                <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+                  {`${chapterIndex}.3 – ${hwTitle}`}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-2.5 pt-1.5 md:pt-2.5 pb-5">
+                <TableSimple
+                  headers={hwHeaders.length > 0 ? hwHeaders : capexOpexHeaders}
+                  rows={hwRows}
+                  animateRows
+                  stagger={0.03}
+                  zebra
+                  denseRows
+                  emphasizeFirstCol
+                />
+              </CardContent>
+            </Card>
+          </SectionDelay>
+        )}
+
+        {/* Revenue Mix */}
+        {revLabels.length > 0 && revSeries.length > 0 && (
+          <SectionDelay delayMs={800}>
+            <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
+              <CardHeader className="border-b-0 p-2.5">
+                <CardTitle title={locale.startsWith('de') ? 'Indikativ, interne Planung' : 'Indicative, internal planning'} className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+                  {`${chapterIndex}.2 – ${tBp('headings.revenueStreams') as string}`}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-2.5 pt-0 pb-5">
+                {revenueNarrative ? (
+                  <p className="mt-1 text-sm leading-relaxed text-[--color-foreground-muted]">{revenueNarrative}</p>
+                ) : null}
+                <div className="mt-2.5 md:mt-3.5">
+                  <RevenueMixChart
+                    labels={revLabels}
+                    series={revSeries as any}
+                    total={total}
+                    titleBar={tBp('headings.revenueStreams')}
+                    titleLine={locale.startsWith('de') ? 'Gesamtumsatz' : 'Total Revenue'}
+                    locale={locale}
+                    palette={brandPalette}
+                  />
+                </div>
+                {(() => {
+                  try {
+                    if (!Array.isArray(revLabels) || revLabels.length === 0 || !Array.isArray(revSeries) || revSeries.length === 0) return null;
+                    const li = revLabels.length - 1;
+                    const totals = revSeries.reduce((acc: number, s) => acc + (Number(s.values?.[li] ?? 0)), 0);
+                    if (!totals) return null;
+                    const parts = revSeries.map((s) => ({ name: s.name, pct: Math.round(((Number(s.values?.[li] ?? 0)) / totals) * 100) }));
+                    const line = parts.map((p) => `${p.name}: ${p.pct}%`).join(' • ');
+                    return (
+                      <div className="not-prose mt-2 text-[11px] md:text-[11.5px] text-center text-[--color-foreground-muted]">
+                        {line}
+                      </div>
+                    );
+                  } catch { return null; }
+                })()}
+              </CardContent>
+            </Card>
+          </SectionDelay>
+        )}
+
+        {/* Use of Funds (Years) */}
+        {uofHeaders.length > 0 && uofRows.length > 0 && (
+          <SectionDelay delayMs={1200}>
+            <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
+              <CardHeader className="border-b-0 p-2.5">
+                <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+                  {`${chapterIndex}.3 – ${tBp('headings.useOfFunds') as string}`}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-2.5 pt-0 pb-5">
+                <TableSimple
+                  headers={uofHeaders}
+                  rows={uofRows.map((r: any[]) => r.map((c) => (typeof c === 'number' ? nf.format(c) : String(c))))}
+                  className="mt-1.5 min-w-[640px] bg-transparent ring-0 shadow-none"
+                  animateRows
+                  rowVariant="fadeInUp"
+                  stagger={0.04}
+                  zebra
+                  denseRows
+                />
+              </CardContent>
+            </Card>
+          </SectionDelay>
+        )}
+
+        {/* Revenue vs. Costs */}
+        {revCostSeries.length > 0 && (
+          <SectionDelay delayMs={1600}>
+            <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
+              <CardHeader className="border-b-0 p-2.5">
+                <CardTitle title={locale.startsWith('de') ? 'Indikativ, interne Planung' : 'Indicative, internal planning'} className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+                  {`${chapterIndex}.4 – ${tBp('headings.revenueVsCost') as string}`}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-2.5 pt-0 pb-5">
+                {(() => {
+                  const desc = tBp('figures.revenueVsCostDescription');
+                  return desc ? (
+                    <p className="mt-1 text-sm leading-relaxed text-[--color-foreground-muted]">{desc as unknown as string}</p>
+                  ) : null;
+                })()}
+                <div className="mt-2.5 flex justify-center pb-5">
+                  <MultiLineEuroChartClient
+                    series={revCostSeries as any}
+                    ariaLabel={tBp('headings.revenueVsCost') as string}
+                    responsive
+                    height={260}
+                    locale={locale}
+                    yTicksCount={5}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </SectionDelay>
+        )}
+
+        {/* Cash Flow */}
+        {cashFlowSeries.length > 0 && (
+          <SectionDelay delayMs={2000}>
+            <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
+              <CardHeader className="border-b-0 p-2.5">
+                <CardTitle title={locale.startsWith('de') ? 'Indikativ, interne Planung' : 'Indicative, internal planning'} className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+                  {`${chapterIndex}.5 – ${tBp('headings.cashFlow') as string}`}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-2.5 pt-0 pb-5">
+                {(() => {
+                  const desc = tBp('figures.cashFlowDescription');
+                  return desc ? (
+                    <p className="mt-1 text-sm leading-relaxed text-[--color-foreground-muted]">{desc as unknown as string}</p>
+                  ) : null;
+                })()}
+                <div className="mt-2.5 flex justify-center pb-5">
+                  <MultiLineEuroChartClient
+                    series={cashFlowSeries as any}
+                    ariaLabel={tBp('headings.cashFlow') as string}
+                    responsive
+                    height={260}
+                    showArea
+                    locale={locale}
+                    yTicksCount={5}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </SectionDelay>
+        )}
+
+        {/* Profit Bridge (Waterfall) */}
+        {profitBridgeSteps.length > 0 && (
+          <SectionDelay delayMs={2400}>
+            <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
+              <CardHeader className="border-b-0 p-2.5">
+                <CardTitle title={locale.startsWith('de') ? 'Indikativ, interne Planung' : 'Indicative, internal planning'} className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+                  {`${chapterIndex}.6 – ${tBp('headings.profitBridge') as string}`}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-2.5 pt-0">
+                <WaterfallEuroChartClient
+                  steps={profitBridgeSteps as any}
+                  ariaLabel={tBp('headings.profitBridge') as string}
+                  responsive
+                  height={280}
+                  locale={locale}
+                  yTicksCount={5}
+                />
+              </CardContent>
+            </Card>
+          </SectionDelay>
+        )}
+
+        {/* EBITDA by Year */}
+        {ebitdaHeaders.length > 0 && ebitdaRows.length > 0 && (
+          <SectionDelay delayMs={2800}>
+            <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
+              <CardHeader className="border-b-0 p-2.5">
+                <CardTitle title={locale.startsWith('de') ? 'Indikativ, interne Planung' : 'Indicative, internal planning'} className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+                  {`${chapterIndex}.7 – ${ebitdaTitle || (tBp('headings.plOverview') as string)}`}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-2.5 pt-0 pb-5">
+                <TableSimple
+                  headers={ebitdaHeaders}
+                  rows={ebitdaRows.map((r: any[]) => r.map((c) => (typeof c === 'number' ? nf.format(c) : String(c))))}
+                  className="mt-1.5 md:mt-2.5 min-w-[420px] bg-transparent ring-0 shadow-none"
+                  animateRows
+                  rowVariant="fadeInUp"
+                  stagger={0.04}
+                  zebra
+                  denseRows
+                />
+              </CardContent>
+            </Card>
+          </SectionDelay>
+        )}
+
+        {/* Revenue Forecast */}
+        {Array.isArray(fin?.revenueForecast) && fin.revenueForecast.length > 0 && (
+          <SectionDelay delayMs={3200}>
+            <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
+              <CardHeader className="border-b-0 p-2.5">
+                <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+                  {`${chapterIndex}.8 – ${locale.startsWith('de') ? 'Umsatzprognose' : 'Revenue Forecast'}`}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-2.5 pt-0 pb-5">
+                <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                  {fin.revenueForecast.map((x: any, i: number) => (
+                    <div key={i} className="flex items-start gap-2 rounded-md border border-[--color-border-subtle] bg-[--muted]/10 p-2 md:p-2.5">
+                      <span aria-hidden className="h-4 w-4 mt-0.5 inline-flex items-center justify-center text-emerald-600">✓</span>
+                      <span className="text-[13px] md:text-[14px] leading-relaxed text-[--color-foreground]">{typeof x === 'string' ? x : String(x)}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </SectionDelay>
+        )}
+
+        {/* Revenue Table (simple) */}
+        {Array.isArray(fin?.revenueTable) && fin.revenueTable.length > 0 && (
+          <SectionDelay delayMs={3600}>
+            <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
+              <CardHeader className="border-b-0 p-2.5">
+                <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+                  {`${chapterIndex}.9 – ${locale.startsWith('de') ? 'Umsatztabelle' : 'Revenue Table'}`}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-2.5 pt-0 pb-5">
+                <TableSimple
+                  rows={fin.revenueTable.map((r: any[]) => r.map((c) => (typeof c === 'number' ? nf.format(c) : String(c))))}
+                  className="mt-1.5 md:mt-2.5 min-w-[520px] bg-transparent ring-0 shadow-none"
+                  animateRows
+                  rowVariant="fadeInUp"
+                  stagger={0.04}
+                  zebra
+                  denseRows
+                  emphasizeFirstCol
+                />
+              </CardContent>
+            </Card>
+          </SectionDelay>
+        )}
+
+        {/* Capital Needs */}
+        {Array.isArray(fin?.capitalNeeds) && fin.capitalNeeds.length > 0 && (
+          <SectionDelay delayMs={4000}>
+            <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
+              <CardHeader className="border-b-0 p-2.5">
+                <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+                  {`${chapterIndex}.10 – ${tBp('headings.fundraising') as string}`}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-2.5 pt-0 pb-5">
+                <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                  {fin.capitalNeeds.map((x: any, i: number) => (
+                    <div key={i} className="flex items-start gap-2 rounded-md border border-[--color-border-subtle] bg-[--muted]/10 p-2 md:p-2.5">
+                      <CheckCircle2 aria-hidden className="h-4 w-4 mt-0.5 text-emerald-500 shrink-0" />
+                      <span className="text-[13px] md:text-[14px] leading-relaxed text-[--color-foreground]">{typeof x === 'string' ? x : String(x)}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </SectionDelay>
+        )}
+
+        {/* Funding */}
+        {Array.isArray(fin?.funding) && fin.funding.length > 0 && (
+          <SectionDelay delayMs={4400}>
+            <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
+              <CardHeader className="border-b-0 p-2.5">
+                <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+                  {`${chapterIndex}.11 – ${tBp('sections.capTable') as string}`}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-2.5 pt-0 pb-5">
+                <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                  {fin.funding.map((x: any, i: number) => (
+                    <div key={i} className="flex items-start gap-2 rounded-md border border-[--color-border-subtle] bg-[--muted]/10 p-2 md:p-2.5">
+                      <span aria-hidden className="h-4 w-4 mt-0.5 inline-flex items-center justify-center text-emerald-600">✓</span>
+                      <span className="text-[13px] md:text-[14px] leading-relaxed text-[--color-foreground]">{typeof x === 'string' ? x : String(x)}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </SectionDelay>
+        )}
+
+        {/* Funding Strategy */}
+        {Array.isArray(fin?.fundingStrategy) && fin.fundingStrategy.length > 0 && (
+          <SectionDelay delayMs={4800}>
+            <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
+              <CardHeader className="border-b-0 p-2.5">
+                <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+                  {`${chapterIndex}.12 – ${tBp('headings.projections') as string}`}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-2.5 pt-1.5 md:pt-2.5 pb-5">
+                <div className="grid gap-1.5 sm:grid-cols-2 lg:grid-cols-3">
+                  {fin.fundingStrategy.map((x: any, i: number) => (
+                    <div key={i} className="flex items-start gap-2 rounded-md border border-[--color-border-subtle] bg-[--muted]/10 p-2 md:p-2.5">
+                      <span aria-hidden className="h-4 w-4 mt-0.5 inline-flex items-center justify-center text-emerald-600">✓</span>
+                      <span className="text-[13px] md:text-[14px] leading-relaxed text-[--color-foreground]">{typeof x === 'string' ? x : String(x)}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </SectionDelay>
+        )}
+
+        {/* Annahmen (Liste) – optional */}
+        {Array.isArray(finAssumptions) && finAssumptions.length > 0 && (
+          <SectionDelay delayMs={5000}>
+            <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
+              <CardHeader className="border-b-0 p-2.5">
+                <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+                  {`${chapterIndex}.13 – ${locale.startsWith('de') ? 'Annahmen' : 'Assumptions'}`}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-2.5 pt-0 pb-3">
+                <ul className="list-none pl-0 space-y-1.5">
+                  {finAssumptions.map((a, i) => (
+                    <li key={`ass-${i}`} className="text-[13px] md:text-[14px] text-[--color-foreground] opacity-90 leading-relaxed">{a}</li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          </SectionDelay>
+        )}
+
+        {/* Annahmen (Tabelle) – optional */}
+        {Array.isArray(finAssumptionsTable?.headers) && finAssumptionsTable.headers!.length > 0 && Array.isArray(finAssumptionsTable?.rows) && finAssumptionsTable.rows!.length > 0 && (
+          <SectionDelay delayMs={5200}>
+            <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
+              <CardHeader className="border-b-0 p-2.5">
+                <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+                  {`${chapterIndex}.14 – ${locale.startsWith('de') ? 'Annahmen (Tabelle)' : 'Assumptions (Table)'}`}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-2.5 pt-0 pb-5">
+                <TableSimple
+                  headers={finAssumptionsTable.headers as string[]}
+                  rows={finAssumptionsTable.rows as (string|number)[][]}
+                  animateRows
+                  stagger={0.03}
+                  zebra
+                  denseRows
+                  emphasizeFirstCol
+                />
+              </CardContent>
+            </Card>
+          </SectionDelay>
+        )}
+      </div>
+    </div>
+  );
+}
