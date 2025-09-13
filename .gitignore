@@ -1,0 +1,25 @@
+### General
+.DS_Store
+node_modules/
+.env*
+!.env.example
+
+### Vercel/Netlify
+.vercel/
+netlify.toml
+
+### Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+### TypeScript
+*.tsbuildinfo
+
+### Subproject: businessplan-site (Next.js)
+businessplan-site/node_modules/
+businessplan-site/.next/
+businessplan-site/out/
+businessplan-site/coverage/
+businessplan-site/tsconfig.tsbuildinfo
