@@ -27,43 +27,47 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
 
       - name: Cache Playwright browsers
         uses: actions/cache@v4
         with:
           path: |
             ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('robotics/package-lock.json') }}
+          key: ${{ runner.os }}-playwright-${{ hashFiles('robotics/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-playwright-
 
       - name: Install dependencies
         working-directory: ./robotics
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Lint
         working-directory: ./robotics
-        run: npm run lint
+        run: pnpm run lint
 
       - name: Unit tests
         working-directory: ./robotics
-        run: npm test -- --ci
+        run: pnpm test -- --ci
 
       - name: Build
         env:
           CI: true
         working-directory: ./robotics
-        run: npm run build
+        run: pnpm run build
         continue-on-error: true
 
       - name: Install Playwright Browsers
         working-directory: ./robotics
-        run: npx playwright install --with-deps
+        run: pnpm exec playwright install --with-deps
 
       - name: E2E tests (Playwright)
         working-directory: ./robotics
-        run: npx playwright test
+        run: pnpm exec playwright test
 
       - name: Upload Playwright traces on failure
         if: failure()

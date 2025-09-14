@@ -17,6 +17,9 @@ jobs:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      # Recommended: use NAME and TEAM SLUG; fall back to IDs if not provided
+      VERCEL_PROJECT_NAME: ${{ secrets.VERCEL_PROJECT_NAME }}
+      VERCEL_TEAM_SLUG: ${{ secrets.VERCEL_TEAM_SLUG }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -36,15 +39,36 @@ jobs:
       - name: Verify Vercel CLI auth
         run: |
           npx vercel --version
+          # List teams and projects (no secrets printed)
           npx vercel teams ls --token=$VERCEL_TOKEN || true
           npx vercel projects ls --token=$VERCEL_TOKEN || true
+
+      - name: Resolve Vercel project/scope variables
+        id: resolve
+        shell: bash
+        run: |
+          set -e
+          # Prefer NAME/SLUG; fall back to IDs
+          PROJECT_REF="${VERCEL_PROJECT_NAME:-$VERCEL_PROJECT_ID}"
+          SCOPE_REF="${VERCEL_TEAM_SLUG:-$VERCEL_ORG_ID}"
+          echo "project_ref_masked=${#PROJECT_REF}" >> $GITHUB_OUTPUT
+          echo "scope_ref_masked=${#SCOPE_REF}" >> $GITHUB_OUTPUT
+          echo "PROJECT_REF=$PROJECT_REF" >> $GITHUB_ENV
+          echo "SCOPE_REF=$SCOPE_REF" >> $GITHUB_ENV
+          # Build optional flags; do not force if empty to allow default scope resolution
+          EXTRA_PROJECT=""
+          EXTRA_SCOPE=""
+          if [ -n "$PROJECT_REF" ]; then EXTRA_PROJECT="--project=\"$PROJECT_REF\""; fi
+          if [ -n "$SCOPE_REF" ]; then EXTRA_SCOPE="--scope=\"$SCOPE_REF\""; fi
+          echo "EXTRA_PROJECT=$EXTRA_PROJECT" >> $GITHUB_ENV
+          echo "EXTRA_SCOPE=$EXTRA_SCOPE" >> $GITHUB_ENV
 
       - name: Link project (no prompt)
         run: |
           npx vercel link --yes \
             --cwd=robotics \
-            --project=$VERCEL_PROJECT_ID \
-            --org=$VERCEL_ORG_ID \
+            ${EXTRA_PROJECT} \
+            ${EXTRA_SCOPE} \
             --token=$VERCEL_TOKEN
 
       - name: Pull Vercel Environment Information
@@ -53,8 +77,8 @@ jobs:
             --environment=production \
             --cwd=robotics \
             --token=$VERCEL_TOKEN \
-            --project=$VERCEL_PROJECT_ID \
-            --org=$VERCEL_ORG_ID
+            ${EXTRA_PROJECT} \
+            ${EXTRA_SCOPE}
 
       - name: Install dependencies
         working-directory: robotics
@@ -70,5 +94,5 @@ jobs:
             --prod \
             --cwd=robotics \
             --token=$VERCEL_TOKEN \
-            --project=$VERCEL_PROJECT_ID \
-            --org=$VERCEL_ORG_ID
+            ${EXTRA_PROJECT} \
+            ${EXTRA_SCOPE}
