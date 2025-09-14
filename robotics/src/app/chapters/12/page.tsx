@@ -15,7 +15,6 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function WorkPackagesPage() {
   const locale = await getLocale();
-  const tBp = await getTranslations('bp');
   
   // Debug-Ausgabe, um die Kapitel zu überprüfen
   console.log('Geladene Kapitel:', chapters.map(c => ({ 
@@ -46,7 +45,7 @@ export default async function WorkPackagesPage() {
     contentKeys: messages.content ? Object.keys(messages.content) : []
   });
   
-  const { bp } = messages;
+  // Hinweis: bp wird nicht direkt verwendet; Zugriff erfolgt über messages?.bp oben
   
   // Debug-Ausgabe, um die Daten zu überprüfen
   console.log('Verfügbare i18n-Schlüssel:', Object.keys(messages?.content || {}));

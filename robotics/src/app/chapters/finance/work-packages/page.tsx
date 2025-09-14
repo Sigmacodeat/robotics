@@ -10,8 +10,8 @@ import { Plus } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function WorkPackagesPage() {
-  const [workPackages, setWorkPackages] = useState<WorkPackage[]>(initialWorkPackages);
-  const [selectedWorkPackage, setSelectedWorkPackage] = useState<WorkPackage | null>(null);
+  const [workPackages] = useState<WorkPackage[]>(initialWorkPackages);
+  const [, setSelectedWorkPackage] = useState<WorkPackage | null>(null);
 
   const handleEdit = (wp: WorkPackage) => {
     setSelectedWorkPackage(wp);
