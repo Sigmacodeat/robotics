@@ -1,13 +1,13 @@
 {
   "version": 2,
-  "framework": "nextjs",
-  "buildCommand": "cd businessplan-site && pnpm build",
-  "installCommand": "cd businessplan-site && pnpm install --frozen-lockfile",
-  "outputDirectory": "businessplan-site/.next",
-  "rootDirectory": "businessplan-site",
-  "git": {
-    "deploymentEnabled": {
-      "main": true
+  "builds": [
+    {
+      "src": "businessplan-site/package.json",
+      "use": "@vercel/next"
     }
-  }
+  ],
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/.*", "dest": "/businessplan-site" }
+  ]
 }
