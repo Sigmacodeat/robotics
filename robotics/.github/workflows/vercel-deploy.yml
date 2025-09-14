@@ -33,12 +33,28 @@ jobs:
         with:
           version: 9
 
+      - name: Verify Vercel CLI auth
+        run: |
+          npx vercel --version
+          npx vercel teams ls --token=$VERCEL_TOKEN || true
+          npx vercel projects ls --token=$VERCEL_TOKEN || true
+
+      - name: Link project (no prompt)
+        run: |
+          npx vercel link --yes \
+            --cwd=robotics \
+            --project=$VERCEL_PROJECT_ID \
+            --org=$VERCEL_ORG_ID \
+            --token=$VERCEL_TOKEN
+
       - name: Pull Vercel Environment Information
         run: |
           npx vercel pull --yes \
             --environment=production \
+            --cwd=robotics \
             --token=$VERCEL_TOKEN \
-            --cwd=robotics
+            --project=$VERCEL_PROJECT_ID \
+            --org=$VERCEL_ORG_ID
 
       - name: Install dependencies
         working-directory: robotics
@@ -52,5 +68,7 @@ jobs:
         run: |
           npx vercel deploy --prebuilt \
             --prod \
+            --cwd=robotics \
             --token=$VERCEL_TOKEN \
-            --cwd=robotics
+            --project=$VERCEL_PROJECT_ID \
+            --org=$VERCEL_ORG_ID
