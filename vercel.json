@@ -1,9 +1,10 @@
 {
   "version": 2,
   "framework": "nextjs",
-  "buildCommand": "pnpm build",
-  "installCommand": "pnpm install --frozen-lockfile",
-  "outputDirectory": ".next",
+  "buildCommand": "cd businessplan-site && pnpm build",
+  "installCommand": "cd businessplan-site && pnpm install --frozen-lockfile",
+  "outputDirectory": "businessplan-site/.next",
+  "rootDirectory": "businessplan-site",
   "git": {
     "deploymentEnabled": {
       "main": true
