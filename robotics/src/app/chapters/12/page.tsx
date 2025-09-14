@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { getLocale, getTranslations } from 'next-intl/server';
+import { getLocale } from 'next-intl/server';
 import { chapters } from '../chapters.config';
 import { getMessages } from '@/i18n/messages';
 import WorkPackagesDetailedChapter from '@/app/components/chapters/sections/chapter/WorkPackagesDetailedChapter';
