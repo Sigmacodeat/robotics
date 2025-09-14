@@ -1,19 +1,17 @@
 # Deployment-Setup (Vercel + Monorepo)
 
-Dieses Repo deployt die App im Unterordner `businessplan-site/` nach Vercel.
+Dieses Repo deployt die App im Unterordner `robotics/` nach Vercel.
 
 ## Projektstruktur
 
 - Root-Repo: Metadaten, `vercel.json`, `.gitignore`, `README.md`
-- App: `businessplan-site/` (Next.js 15)
+- App: `robotics/` (Next.js 15)
 
 ## Vercel-Konfiguration
 
-- `vercel.json` im Repo-Root:
-  - `installCommand`: `cd businessplan-site && pnpm install --frozen-lockfile`
-  - `buildCommand`: `cd businessplan-site && pnpm build`
-  - Framework: `nextjs`
-  - Auto-Deploy: für `main` aktiviert
+- Empfohlen: In Vercel die Root Directory direkt auf `robotics/` setzen. Dann sind keine
+  speziellen Install/Build Commands nötig und Vercel erkennt Next.js automatisch.
+  Optional kann `robotics/vercel.json` entfernt werden (Vercel-Defaults reichen).
 
 ## Empfohlene Projekteinstellungen (in Vercel UI)
 
@@ -30,7 +28,8 @@ Dieses Repo deployt die App im Unterordner `businessplan-site/` nach Vercel.
 
 3. Project → Settings → General
    - Framework Preset: Next.js
-   - Node.js: >= 18
+   - Root Directory: `robotics/`
+   - Node.js: 20.x
 
 ## Wichtige Hinweise
 
@@ -46,7 +45,9 @@ Dieses Repo deployt die App im Unterordner `businessplan-site/` nach Vercel.
   - Stelle sicher, dass `pnpm-lock.yaml` im Subordner aktuell ist
 
 - Finden/Erkennen der App:
-  - `vercel.json` steuert Install/Build im Subordner – Root Directory muss in Vercel nicht gesetzt werden
+  - Setze die Root Directory in Vercel auf `robotics/`. Alternativ können Install/Build-Commands manuell gesetzt werden:
+    - Install: `cd robotics && pnpm install --frozen-lockfile`
+    - Build: `cd robotics && pnpm build`
 
 - Mehrfach-Deployments:
   - Prüfe unter Vercel → Dashboard, ob mehrere Projekte auf dasselbe Repo/Branch zeigen. Duplikate löschen oder deaktivieren.

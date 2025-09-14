@@ -17,9 +17,9 @@ yarn-error.log*
 ### TypeScript
 *.tsbuildinfo
 
-### Subproject: businessplan-site (Next.js)
-businessplan-site/node_modules/
-businessplan-site/.next/
-businessplan-site/out/
-businessplan-site/coverage/
-businessplan-site/tsconfig.tsbuildinfo
+### Subproject: robotics (Next.js)
+robotics/node_modules/
+robotics/.next/
+robotics/out/
+robotics/coverage/
+robotics/tsconfig.tsbuildinfo
