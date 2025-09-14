@@ -30,6 +30,7 @@ import closingPage from './closingPage'
 import sections from './sections'
 import bp from './bp'
 import content from './content'
+import workPackagesDetailed from './workPackagesDetailed'
 
 const en = {
   content,
@@ -64,6 +65,7 @@ const en = {
   closingPage,
   sections,
   bp,
+  workPackagesDetailed,
 }
 
 export default en

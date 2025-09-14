@@ -1,0 +1,17 @@
+const milestones = {
+  title: "Meilensteinplan 2025–2030",
+  headers: ["Jahr", "Quartal", "Meilenstein", "Arbeitspakete", "Abhängigkeiten", "Akzeptanzkriterien"],
+  rows: [
+    [2025, "Q1", "Kickoff & Scope fixiert", "WP1", "-", "Stakeholder sign-off"],
+    [2025, "Q2", "Architektur-Entscheidung", "WP2", "WP1", "Architektur-Dokument freigegeben"],
+    [2025, "Q4", "MVP Feature-Set", "WP3", "WP2", "Smoke-Tests grün, Demo möglich"],
+    [2026, "Q2", "Pilot-Rollouts (Design-Partner)", "WP3, WP4", "MVP", "2+ Referenz-Demos, SLA-Feedback"],
+    [2026, "Q4", "QA/Release-Candidate", "WP4", "WP3", "Coverage ≥ 70%, kritische Bugs < 2%"],
+    [2027, "Q2", "v1.0 Launch (RaaS)", "WP5", "WP4", "Abnahme durch Stakeholder, NPS > 30"],
+    [2028, "Q1", "App‑Store v1 (DX/SDK)", "Weiterentwicklung", "v1.0", "10+ Skills, Dev-Dokumentation"],
+    [2029, "Q3", "Scale & Enterprise‑SLAs", "Ops/Platform", "App‑Store v1", "99.99% Uptime, <10ms Latency"],
+    [2030, "Q2", "Multi‑Sport Erweiterung", "Product/AI", "Scale", ">=2 neue Verticals live"],
+  ],
+} as const;
+
+export default milestones;

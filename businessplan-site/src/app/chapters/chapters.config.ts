@@ -82,6 +82,11 @@ export const chapters: Chapter[] = [
     { id: 'buyers', titleKey: 'exit.buyers', title: 'Käuferlandschaft' },
     { id: 'timeline', titleKey: 'exit.timeline', title: 'Zeitleiste' },
   ] },
+  { id: 12, slug: 'work-packages', title: 'Arbeitspakete', titleKey: 'workPackages', requiredFields: [], subchapters: [
+    { id: 'overview', titleKey: 'workPackages.overview', title: 'Übersicht' },
+    { id: 'details', titleKey: 'workPackages.details', title: 'Detaillierte Aufstellung' },
+    { id: 'timeline', titleKey: 'workPackages.timeline', title: 'Zeitplan' },
+  ] },
 ];
 
 export const totalChapters = chapters.length;

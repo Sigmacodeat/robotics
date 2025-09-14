@@ -30,6 +30,7 @@ import closingPage from './closingPage'
 import sections from './sections'
 import bp from './bp'
 import content from './content'
+import workPackagesDetailed from './workPackagesDetailed'
 
 const de = {
   content,
@@ -65,6 +66,7 @@ const de = {
   closingPage,
   sections,
   bp,
+  workPackagesDetailed,
 }
 
 export default de

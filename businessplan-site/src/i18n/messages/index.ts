@@ -28,6 +28,7 @@ export async function getMessages(locale: SupportedLocale) {
     dissemination: (m as any).dissemination ?? {},
     company: (m as any).company ?? {},
     cta: (m as any).cta ?? {},
+    workPackagesDetailed: (m as any).workPackagesDetailed ?? {},
   } as const;
 
   // WICHTIG: bestehendes top-level content (z. B. content.solution.*) nicht überschreiben

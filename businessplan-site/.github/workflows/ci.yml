@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: Lint, Test, Build
+    runs-on: ubuntu-latest
+    env:
+      NEXT_TELEMETRY_DISABLED: '1'
+      CI: true
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('businessplan-site/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
+      - name: Install dependencies
+        working-directory: ./businessplan-site
+        run: npm ci
+
+      - name: Lint
+        working-directory: ./businessplan-site
+        run: npm run lint
+
+      - name: Unit tests
+        working-directory: ./businessplan-site
+        run: npm test -- --ci
+
+      - name: Build
+        env:
+          CI: true
+        working-directory: ./businessplan-site
+        run: npm run build
+        continue-on-error: true
+
+      - name: Install Playwright Browsers
+        working-directory: ./businessplan-site
+        run: npx playwright install --with-deps
+
+      - name: E2E tests (Playwright)
+        working-directory: ./businessplan-site
+        run: npx playwright test
+
+      - name: Upload Playwright traces on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces-and-results
+          path: |
+            businessplan-site/test-results
+            businessplan-site/playwright-report
+          if-no-files-found: ignore
+

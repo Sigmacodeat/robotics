@@ -15,6 +15,7 @@ export default function CompactChapterNav({ currentChapter, orientation = "horiz
   const isHorizontal = orientation === "horizontal";
   const pathname = usePathname();
   const tCover = useTranslations("chapters.cover");
+  const tBp = useTranslations("bp");
   const locale = useLocale();
   const isCoverActive = pathname?.endsWith("/chapters/cover");
   const coverLabel = tCover("title");
@@ -36,14 +37,19 @@ export default function CompactChapterNav({ currentChapter, orientation = "horiz
   }, [isCoverActive, derivedId, currentChapter]);
 
   // Klassen konsolidieren (vermeidet Redundanzen)
+  // Größere Touch-Targets für mobile Geräte
   const linkBase = "relative inline-flex items-center rounded-xl transition-all duration-300 focus:outline-none focus-visible:outline-none hover:shadow-sm";
-  // Etwas größer und mit klarerer Hierarchie für bessere Lesbarkeit
-  const linkHoriz = "gap-1.5 px-2 py-0.5 text-[13.5px] md:text-[14.5px] leading-5 font-medium";
-  const linkVert = (active: boolean) => clsx("gap-1 px-2 text-[14px] md:text-[15px] leading-[1.25] w-full font-medium", active ? "py-1" : "py-0.5");
+  // Größere Abstände und bessere Lesbarkeit auf mobilen Geräten
+  const linkHoriz = "gap-2 px-3 py-2.5 text-[14px] sm:text-[13.5px] md:text-[14.5px] leading-5 font-medium";
+  const linkVert = (active: boolean) => clsx(
+    "gap-2 px-3 py-2.5 text-[15px] sm:text-[14px] md:text-[15px] leading-[1.25] w-full font-medium",
+    "sm:py-1.5", // Kleinere Abstände auf größeren Bildschirmen
+    active ? "sm:py-2" : "sm:py-1"
+  );
   const linkActive = "text-[--color-foreground] bg-[--muted]/20 border-gradient";
   const linkInactive = "text-[--color-foreground-muted] hover:text-[--color-foreground] hover:bg-[--muted]/15 border border-transparent";
-  // Kapitel-Nummern etwas prominenter
-  const chipClass = "inline-flex h-5 w-6 items-center justify-center rounded-lg bg-[--muted]/15 ring-1 ring-[--color-border-subtle] text-[11px] font-semibold tabular-nums shadow-[0_1px_0_rgba(0,0,0,0.04)] relative -translate-y-[1px]";
+  // Größere Kapitel-Nummern für bessere Bedienbarkeit
+  const chipClass = "inline-flex h-7 w-7 sm:h-6 sm:w-6 items-center justify-center rounded-lg bg-[--muted]/15 ring-1 ring-[--color-border-subtle] text-[12px] sm:text-[11px] font-semibold tabular-nums shadow-[0_1px_0_rgba(0,0,0,0.04)] relative -translate-y-[1px] flex-shrink-0";
 
   const ActiveOutline = () => (
     <motion.span
@@ -66,13 +72,13 @@ export default function CompactChapterNav({ currentChapter, orientation = "horiz
     >
       <div
         className={clsx(
-          "rounded-2xl bg-[--color-surface]/60 supports-[backdrop-filter]:backdrop-blur-xl",
-          isHorizontal ? "overflow-x-auto no-scrollbar" : ""
+          "rounded-2xl bg-[--color-surface]/80 supports-[backdrop-filter]:backdrop-blur-xl",
+          isHorizontal ? "overflow-x-auto no-scrollbar" : "w-full sm:w-64"
         )}
       >
         {/* Sidebar-Titel nur im vertikalen Modus */}
         {!isHorizontal && (
-          <div className="px-3 pt-2 pb-1 text-xs font-medium uppercase tracking-wide text-[--color-foreground-muted]">
+          <div className="px-4 pt-3 pb-2 text-xs font-medium uppercase tracking-wide text-[--color-foreground-muted] sm:px-3 sm:pt-2 sm:pb-1">
             {chapterWord}
           </div>
         )}
@@ -83,8 +89,8 @@ export default function CompactChapterNav({ currentChapter, orientation = "horiz
           layout
           className={clsx(
             isHorizontal
-              ? "flex items-center gap-1 px-1.5 py-0 min-w-full"
-              : "flex flex-col items-stretch gap-0.5 p-1 w-56"
+              ? "flex items-center gap-1 px-1.5 py-1 min-w-full"
+              : "flex flex-col items-stretch gap-1 p-1.5 w-full"
           )}
         >
           {/* Deckblatt als eigenständiges Kapitel 0 */}
@@ -104,7 +110,7 @@ export default function CompactChapterNav({ currentChapter, orientation = "horiz
               <span className={chipClass}>
                 0
               </span>
-              <span className={clsx("truncate", isHorizontal ? "whitespace-nowrap max-w-[22ch] leading-tight" : "flex-1 text-left leading-tight")}>
+              <span className={clsx("truncate", isHorizontal ? "whitespace-nowrap max-w-[20ch] sm:max-w-[22ch] leading-tight" : "flex-1 text-left leading-tight")}>
                 {coverLabel}
               </span>
             </Link>
@@ -116,6 +122,13 @@ export default function CompactChapterNav({ currentChapter, orientation = "horiz
           )}
           {chapters.map((c) => {
             const isActive = typeof activeChapter === 'number' && activeChapter > 0 && c.id === activeChapter;
+            // i18n-Label für Kapitel (bp.sections.<titleKey>) mit Fallback auf statischen Titel
+            let chapterLabel: string = c.title;
+            try {
+              const key = `sections.${c.titleKey}` as any;
+              const translated = tBp(key);
+              if (translated && typeof translated === 'string') chapterLabel = translated as string;
+            } catch {}
             return (
               <motion.li key={c.id} className="py-0" layout>
                 <Link
@@ -127,14 +140,14 @@ export default function CompactChapterNav({ currentChapter, orientation = "horiz
                     isActive ? linkActive : linkInactive
                   )}
                   aria-current={isActive ? "page" : undefined}
-                  title={`${chapterWord} ${c.id}: ${c.title}`}
+                  title={`${chapterWord} ${c.id}: ${chapterLabel}`}
                 >
                   {isActive && <ActiveOutline />}
                   <span className={chipClass}>
                     {c.id}
                   </span>
-                  <span className={clsx("truncate", isHorizontal ? "whitespace-nowrap max-w-[22ch] leading-tight" : "flex-1 text-left leading-tight")}>
-                    {c.title}
+                  <span className={clsx("truncate", isHorizontal ? "whitespace-nowrap max-w-[20ch] sm:max-w-[22ch] leading-tight" : "flex-1 text-left leading-tight")}>
+                    {c.id === 12 ? (isHorizontal ? 'Arbeitspakete' : chapterLabel) : chapterLabel}
                   </span>
                 </Link>
                 {/* Unterkapitel entfernt: Es werden nur Hauptkapitel angezeigt */}
