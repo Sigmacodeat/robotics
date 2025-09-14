@@ -94,7 +94,7 @@ export default async function RootLayout({
     <html lang={normalizedLocale} suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}>
         <I18nProvider locale={normalizedLocale} messages={messages}>
-          <ClientLayout initialLocale={normalizedLocale}>
+          <ClientLayout>
             {children}
           </ClientLayout>
         </I18nProvider>

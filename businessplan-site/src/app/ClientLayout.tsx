@@ -8,10 +8,8 @@ import MotionProvider from "@/components/animation/MotionProvider";
 
 export default function ClientLayout({
   children,
-  initialLocale,
 }: {
   children: React.ReactNode;
-  initialLocale: string;
 }) {
   const [mounted, setMounted] = useState(false);
   

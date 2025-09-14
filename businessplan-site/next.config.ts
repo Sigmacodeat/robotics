@@ -9,18 +9,6 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: __dirname
   },
-  
-  // Enable static exports for the whole app
-  output: 'export',
-  
-  // Ensure static assets are properly served
-  images: {
-    unoptimized: true, // Disable image optimization for static export
-  },
-  
-  // Add base path if needed (should match Vercel project settings)
-  // basePath: process.env.NEXT_PUBLIC_BASE_PATH || '',
-  
   // Ensure source maps are generated for debugging
   productionBrowserSourceMaps: true,
   
