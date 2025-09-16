@@ -9,8 +9,15 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: __dirname
   },
+  // Hinweis: Manifest wird über die Route src/app/manifest.ts ausgeliefert
+  // Ein eigener Header-Eintrag für /site.webmanifest ist nicht nötig,
+  // da unten ein Redirect auf /manifest.webmanifest existiert.
   // Ensure source maps are generated for debugging
   productionBrowserSourceMaps: true,
+  // ESLint wieder aktiv
+  eslint: {
+    ignoreDuringBuilds: false
+  },
   
   async redirects() {
     return [

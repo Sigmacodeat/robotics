@@ -14,7 +14,7 @@ jest.mock('@/i18n/messages', () => ({
   getMessages: async () => mockedMessages,
 }));
 
-import ImpactPage from '@/app/chapters/impact/page';
+import ImpactPage from '@/chapters/impact/page';
 
 async function renderWithMessages(content: any) {
   mockedMessages = { content };

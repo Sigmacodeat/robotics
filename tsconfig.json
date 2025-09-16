@@ -32,6 +32,30 @@
       "@/*": [
         "./src/*"
       ],
+      "@/components/ui/*": [
+        "./src/components/ui/*"
+      ],
+      "@/components/charts/*": [
+        "./src/components/charts/*"
+      ],
+      "@/components/document/*": [
+        "./src/components/document/*"
+      ],
+      "@/components/print/*": [
+        "./src/components/print/*"
+      ],
+      "@/components/animation/*": [
+        "./src/components/animation/*"
+      ],
+      "@/chapters/*": [
+        "./src/app/chapters/*"
+      ],
+      "@/app/components/chapters/*": [
+        "./src/components/chapters/*"
+      ],
+      "@/app/*": [
+        "./src/app/*"
+      ],
       "@components/*": [
         "./src/components/*"
       ],
@@ -39,7 +63,7 @@
         "./src/components/charts/*"
       ],
       "@sections/*": [
-        "./src/app/components/chapters/sections/*"
+        "./src/components/chapters/sections/*"
       ],
       "@ui/*": [
         "./src/components/ui/*"
@@ -53,6 +77,11 @@
     ".next/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "src/app/components/_archived/**",
+    "src/app/components/chapters/_archived/**",
+    "src/_archived/**",
+    "backup_pre_consolidation/**",
+    "scripts/**/__tests__/**"
   ]
 }

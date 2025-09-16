@@ -13,7 +13,7 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = process.cwd();
-const EN_BP_PATH = path.join(ROOT, 'src/i18n/messages/en/bp.ts');
+const EN_BP_PATH = path.join(ROOT, 'src/i18n/messages/en/bp/index.ts');
 const SRC_DIR = path.join(ROOT, 'src');
 
 function readFileSafe(p) {

@@ -11,7 +11,7 @@ jest.mock('next-intl/server', () => ({
 let mockedMessages: any = {};
 jest.mock('@/i18n/messages', () => ({ getMessages: async () => mockedMessages }));
 
-import MarketPage from '@/app/chapters/market/page';
+import MarketPage from '@/chapters/market/page';
 
 async function renderWithMessages(bp: any) {
   mockedMessages = { bp };

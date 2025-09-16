@@ -1,0 +1,196 @@
+const workPackagesDetailed = {
+  title: "Arbeitspakete – Detailliert",
+  note: "Struktur: Ziele/Scope, Deliverables, Aufwand (FTE), Abhängigkeiten, Risiken, KPIs, Milestones, Budget",
+  headersEffort: ["WP", "Rolle", "FTE"],
+  items: [
+    {
+      id: "WP1",
+      name: "Projektvorbereitung & Anforderungsanalyse",
+      timeframe: "Monat 0–2",
+      objectives: [
+        "Ziele und Scope abgestimmt mit Stakeholdern",
+        "Risiken und Annahmen dokumentiert",
+      ],
+      scope: [
+        "Workshops, Interviewleitfäden, Dokumentation",
+        "Projektplan mit Meilensteinen und Abnahmen",
+      ],
+      deliverables: ["Anforderungsdokument", "Projektplan", "Risikoanalyse"],
+      dependencies: [],
+      effort: [
+        { role: "Projektleitung", fte: 0.6 },
+        { role: "Product Manager", fte: 0.4 },
+      ],
+      personMonths: [
+        { role: "Projektleitung", pm: 1.8 },
+        { role: "Product Manager", pm: 1.2 },
+      ],
+      trl: { start: 2, target: 3 },
+      risks: ["Unklare Anforderungen", "Stakeholder-Verfügbarkeit"],
+      mitigations: ["Frühe Reviews", "Asynchrone Abstimmungen"],
+      kpis: [
+        "Scope-Abdeckung ≥ 90% (Review-Checkliste)",
+        "Review-Iterationen ≤ 2 bis Freigabe",
+      ],
+      milestones: [
+        { label: "Kickoff", month: 0, acceptance: "Stakeholder sign-off" },
+        { label: "Anforderungsdokument v1", month: 1, acceptance: "Review abgeschlossen (alle Blocker gelöst)" },
+      ],
+      budget: { personnel: 15, material: 2, subcontracting: 0, other: 1 },
+      budgetJustification: {
+        personnel: "PM/PL für Workshops und Planerstellung",
+        material: "Workshop-Materialien, Tools",
+        other: "Reisekosten/Kommunikation",
+      },
+    },
+    {
+      id: "WP2",
+      name: "Technische Konzeption & Architektur",
+      timeframe: "Monat 3–5",
+      objectives: [
+        "Zielarchitektur und Schnittstellen spezifiziert",
+        "Make/Buy/Partner-Entscheidungen",
+      ],
+      scope: ["Systemarchitektur", "Schnittstellen/SDK", "Qualitätsattribute"],
+      deliverables: ["Technisches Konzept", "Systemarchitektur", "Schnittstellenspezifikation"],
+      dependencies: ["WP1"],
+      effort: [
+        { role: "CIO/CTO", fte: 0.6 },
+        { role: "Platform/Full‑stack", fte: 0.8 },
+        { role: "Safety Engineer", fte: 0.6 },
+      ],
+      personMonths: [
+        { role: "CIO/CTO", pm: 1.8 },
+        { role: "Platform/Full‑stack", pm: 2.4 },
+        { role: "Safety Engineer", pm: 1.8 },
+      ],
+      trl: { start: 3, target: 4 },
+      risks: ["Technologieauswahl verzögert"],
+      mitigations: ["Spike-Prototypen", "Entscheidungsmatrix"],
+      kpis: [
+        "Architekturentscheidungen ≤ 2 Iterationen (Entscheidungsmatrix)",
+        "Schnittstellenspezifikation ≥ 90% vollständig",
+      ],
+      milestones: [
+        { label: "Architektur-Review", month: 3, acceptance: "Entscheidungspapier freigegeben (CTO + Safety)" },
+      ],
+      budget: { personnel: 25, material: 5, subcontracting: 0, other: 2 },
+      budgetJustification: {
+        personnel: "Architektur/Designarbeit mehrerer Senior-Rollen",
+        material: "Prototyping-Lizenzen/Tools",
+      },
+    },
+    {
+      id: "WP3",
+      name: "Entwicklung & Implementierung",
+      timeframe: "Monat 6–13",
+      objectives: [
+        "MVP-Funktionalität geliefert",
+        "CI/CD, Observability, Sicherheits-Gates aktiv",
+      ],
+      scope: ["Kernfeatures", "Tests", "Dokumentation"],
+      deliverables: ["Quellcode", "Testberichte", "Dokumentation"],
+      dependencies: ["WP2"],
+      effort: [
+        { role: "AI Engineer", fte: 2.5 },
+        { role: "Full‑stack Engineer", fte: 2.0 },
+        { role: "Controls Engineer", fte: 1.0 },
+        { role: "QA Engineer", fte: 0.5 },
+      ],
+      personMonths: [
+        { role: "AI Engineer", pm: 20.0 },
+        { role: "Full‑stack Engineer", pm: 16.0 },
+        { role: "Controls Engineer", pm: 8.0 },
+        { role: "QA Engineer", pm: 4.0 },
+      ],
+      trl: { start: 4, target: 6 },
+      risks: ["Feature-Creep", "Integration Drittsysteme"],
+      mitigations: ["Scope Cut Kriterien", "Integrationstest‑Stubs"],
+      kpis: [
+        "Velocity ≥ 20 SP/Sprint (Median über 4 Sprints)",
+        "Unit Coverage ≥ 60% (Core‑Module)",
+        "E2E Smoke‑Suite < 10 min p95",
+      ],
+      milestones: [
+        { label: "MVP Feature-Set", month: 8, acceptance: "Smoke‑Tests grün, Demo öffentlich möglich" },
+      ],
+      budget: { personnel: 80, material: 10, subcontracting: 15, other: 5 },
+      budgetJustification: {
+        personnel: "Hauptentwicklungsphase (AI/FS/Controls/QA)",
+        material: "Compute/Cloud/Tools",
+        subcontracting: "Spezielle 3rd‑Party Komponenten/Integrationen",
+        other: "Lizenz-/Sonstige Kosten",
+      },
+    },
+    {
+      id: "WP4",
+      name: "Testing & Qualitätssicherung",
+      timeframe: "Monat 11–14",
+      objectives: ["Qualität belegt", "Freigabekriterien erfüllt"],
+      scope: ["Systemtests", "Sicherheitsprüfungen", "Freigabedoku"],
+      deliverables: ["Testberichte", "Bug‑Reports", "Freigabedokumentation"],
+      dependencies: ["WP3"],
+      effort: [
+        { role: "QA Engineer", fte: 1.5 },
+        { role: "SRE/MLOps", fte: 0.5 },
+      ],
+      personMonths: [
+        { role: "QA Engineer", pm: 6.0 },
+        { role: "SRE/MLOps", pm: 2.0 },
+      ],
+      trl: { start: 6, target: 7 },
+      risks: ["Instabile Testumgebung"],
+      mitigations: ["Canary/Chaos‑Tests", "Isolierte Pipelines"],
+      kpis: [
+        "Defect Leakage < 3% (Staging→Prod)",
+        "MTTR < 1 Tag (p95)",
+        "Reliability Score ≥ 0.98",
+      ],
+      milestones: [
+        { label: "Coverage 70%", month: 12, acceptance: "CI Coverage ≥ 70% (Core‑Flows)" },
+      ],
+      budget: { personnel: 30, material: 5, subcontracting: 5, other: 2 },
+      budgetJustification: {
+        personnel: "Test-/SRE‑Aufwände für Qualität & Stabilität",
+        material: "Testumgebung/Tools",
+        subcontracting: "Externe Audits/Tests (falls erforderlich)",
+      },
+    },
+    {
+      id: "WP5",
+      name: "Einführung & Schulung",
+      timeframe: "Monat 15–16",
+      objectives: ["Go‑Live", "User Adoption/Training"],
+      scope: ["Schulung", "Benutzerhandbuch", "Abschlussbericht"],
+      deliverables: ["Schulungsunterlagen", "Benutzerhandbuch", "Abschlussbericht"],
+      dependencies: ["WP4"],
+      effort: [
+        { role: "Projektleitung", fte: 0.5 },
+        { role: "Solutions Engineer", fte: 1.0 },
+      ],
+      personMonths: [
+        { role: "Projektleitung", pm: 1.0 },
+        { role: "Solutions Engineer", pm: 2.0 },
+      ],
+      trl: { start: 7, target: 8 },
+      risks: ["Geringe Adoption"],
+      mitigations: ["Enablement‑Plan", "Support‑SLAs"],
+      kpis: [
+        "NPS ≥ 30",
+        ">= 2 Referenzkunden mit schriftlichem Statement",
+        "Onboarding‑Zeit ≤ 1 Tag/Kunde",
+      ],
+      milestones: [
+        { label: "Go‑Live", month: 15, acceptance: "Abnahme durch Stakeholder (SLA vereinbart)" },
+      ],
+      budget: { personnel: 15, material: 3, subcontracting: 0, other: 2 },
+      budgetJustification: {
+        personnel: "Training/Rollout",
+        material: "Enablement‑Materialien",
+        other: "Reise/Support",
+      },
+    },
+  ],
+} as const;
+
+export default workPackagesDetailed;

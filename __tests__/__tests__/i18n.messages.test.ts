@@ -1,4 +1,4 @@
-import {getMessages, type SupportedLocale} from '../src/i18n/messages';
+import { getMessages, type SupportedLocale } from '@/i18n/messages';
 
 describe('i18n: getMessages', () => {
   const locales: SupportedLocale[] = ['de', 'en'];

@@ -27,13 +27,13 @@ beforeAll(async () => {
 });
 
 // Import pages after mocks
-import ExecutivePage from '@/app/chapters/executive/page';
-import MarketPage from '@/app/chapters/market/page';
-import GTMPage from '@/app/chapters/gtm/page';
-import TechnologyPage from '@/app/chapters/technology/page';
-import RisksPage from '@/app/chapters/risks/page';
-import ImpactPage from '@/app/chapters/impact/page';
-import ExitPage from '@/app/chapters/exit-strategy/page';
+import ExecutivePage from '@/chapters/executive/page';
+import MarketPage from '@/chapters/market/page';
+import GTMPage from '@/chapters/gtm/page';
+import TechnologyPage from '@/chapters/technology/page';
+import RisksPage from '@/chapters/risks/page';
+import ImpactPage from '@/chapters/impact/page';
+import ExitPage from '@/chapters/exit-strategy/page';
 
 describe('Businessplan Kapitel – Smoke', () => {
   it('Executive Summary rendert ohne Fehler und zeigt Kernelemente', async () => {

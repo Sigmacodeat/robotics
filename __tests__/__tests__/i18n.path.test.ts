@@ -1,4 +1,4 @@
-import {buildLocalePath} from '../src/i18n/path';
+import { buildLocalePath } from '@/i18n/path';
 
 describe('i18n: buildLocalePath (localePrefix = as-needed)', () => {
   test('DE (default locale) hat kein Prefix', () => {

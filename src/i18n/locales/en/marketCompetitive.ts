@@ -1,0 +1,91 @@
+const marketCompetitive = {
+  matrix: {
+    headers: ["Player", "Stack", "Openness", "Safety", "Ecosystem"],
+    rows: [
+      ["Incumbent A", "Closed", "Low", "Medium", "Low"],
+      ["Incumbent B", "Semi‑closed", "Medium", "Medium", "Medium"],
+      ["SIGMACODE AI", "Modular", "High", "High", "High"],
+    ],
+  },
+  positioning: [
+    "Open, modular stack with app‑store & SDK",
+    "Policy hub & fleet learning as safety/compliance moat",
+    "Enterprise‑ready integrations & observability",
+  ],
+  // Sources/references for overview (indicative)
+  overviewSources: [
+    'NVIDIA Isaac Sim / Omniverse – https://developer.nvidia.com/isaac-sim',
+    'ROS 2 (Robot Operating System) – https://docs.ros.org/en/rolling/',
+    'Gazebo (simulation) – https://gazebosim.org/home',
+    'EU AI Act – https://artificialintelligenceact.eu/',
+    'OpenAI × Figure (humanoid collaboration) – https://figure.ai/',
+  ],
+  // High-level notes for the Market page
+  overview: [
+    "Humanoid hardware is accelerating; software/ecosystems are the bottleneck.",
+    "SIGMACODE AI abstracts hardware via ROS2/adapters, delivers app store & fleet rollouts.",
+    "Differentiation via safety/compliance, tele‑assist, observability & SDK.",
+    "State of the art: foundation models (VLA/RT recursive planners) + ROS2/Isaac stacks consolidate.",
+    "Sim‑to‑real: Isaac Sim/Omniverse & Gazebo accelerate skill training and validation.",
+    "Safety/AI Act: policy engines, audits, CE path become a competitive factor (trust advantage in EU).",
+    "Telemetry/observability: fleet‑wide metrics/logs/video events as standard for ops & QA.",
+    "App ecosystems: marketplaces with rev share drive third‑party skills and faster adoption.",
+  ],
+  // Lists rendered on the Market page (parity with DE)
+  hardware: [
+    "Tesla – Optimus: humanoid; industry/everyday (target); source: https://www.tesla.com/",
+    "Figure – 02: humanoid; ~20kg payload, 1.2 m/s, 5h; collaboration with OpenAI; source: https://figure.ai/",
+    "Agility – Digit: bipedal logistics focus; ~20kg payload; ROS2 partial; purchase (CAPEX); source: https://agilityrobotics.com/",
+    "PAL Robotics – ARI/TIAGo+: research/service; ROS/ROS2; source: https://pal-robotics.com/",
+  ],
+  software: [
+    "Figure / OpenAI: AI robotics collaboration; source: https://figure.ai/",
+    "NVIDIA Isaac / ROS2: sim/perception/navigation stack; source: https://developer.nvidia.com/isaac",
+    "Open‑source – MoveIt/ROS2 Navigation2: manipulation/navigation; source: https://moveit.ros.org/",
+  ],
+  // Technical specs table (indicative, with sources)
+  specsHeaders: [
+    "Model",
+    "Height",
+    "Weight",
+    "Payload",
+    "Speed",
+    "Runtime",
+    "Energy",
+    "Source",
+  ],
+  specsRows: [
+    [
+      "Figure 02",
+      "1.68 m (5'6\")",
+      "70 kg",
+      "20 kg",
+      "1.2 m/s",
+      "~5 h",
+      "Electric",
+      "https://figure.ai/",
+    ],
+    [
+      "Agility Digit",
+      "1.75 m (5'9\")",
+      "~65 kg",
+      "~16 kg (35 lbs)",
+      "tbd",
+      "tbd",
+      "Electric",
+      "https://www.agilityrobotics.com/products",
+    ],
+    [
+      "Tesla Optimus",
+      "~1.73 m (indicative)",
+      "~60–70 kg (Gen2 lighter)",
+      "~20 kg",
+      "~8 km/h (indicative)",
+      "tbd",
+      "Electric",
+      "https://en.wikipedia.org/wiki/Optimus_(robot); https://humanoid.guide/product/optimus-gen2/; https://www.robotics247.com/article/tesla_reveals_gen_2_of_the_optimus_humanoid_robot",
+    ],
+  ],
+} as const;
+
+export default marketCompetitive;

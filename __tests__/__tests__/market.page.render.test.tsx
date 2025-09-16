@@ -16,7 +16,7 @@ jest.mock('@/i18n/messages', () => ({
 }));
 
 // Nach Mocks importieren
-import MarketPage, { generateMetadata } from '@/app/chapters/market/page';
+import MarketPage, { generateMetadata } from '@/chapters/market/page';
 
 // Helper: rendere Seite mit gemockten Messages
 async function renderWithMessages(bp: any) {
