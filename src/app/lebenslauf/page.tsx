@@ -1,6 +1,7 @@
 import Footer from "@components/layout/Footer";
 import { getTranslations, getLocale } from 'next-intl/server';
 import CVTimeline from "@components/chapters/sections/CVTimeline";
+import CVSkills from "@components/chapters/sections/CVSkills";
 import PrintButton from "@components/cv/PrintButton";
 import CopyButton from "@components/cv/CopyButton";
 import VCardButton from "@components/cv/VCardButton";
@@ -31,6 +32,14 @@ export default async function LebenslaufRedirect() {
     const raw = t.raw('summary.bullets') as unknown;
     if (Array.isArray(raw)) summaryBullets = raw as string[];
   } catch {}
+  // Robuster Fallback für Presse-Titel, falls i18n-Key fehlt
+  const pressTitle = (() => {
+    try {
+      return t('press.title');
+    } catch {
+      return 'Presse & Medien';
+    }
+  })();
   // abgeleitete summaryChips entfernt (nicht genutzt)
 
   // Chips-Logik entfernt – nicht in Verwendung
@@ -92,7 +101,7 @@ export default async function LebenslaufRedirect() {
           <div className="px-2 md:px-0">
             <div className="space-y-4">
               <div className="space-y-3">
-                <h1 className="text-base md:text-xl lg:text-2xl font-semibold tracking-tight text-[--color-foreground-strong] text-center">
+                <h1 className="text-[18px] md:text-2xl lg:text-3xl font-semibold tracking-tight text-[--color-foreground-strong] text-center">
                   <span className="align-middle mr-2">Ismet Mesic</span>
                   <span
                     className="align-middle inline-flex items-center gap-1 px-2 py-[2px] rounded-full text-[10px] md:text-xs lowercase font-light tracking-wide
@@ -107,14 +116,14 @@ export default async function LebenslaufRedirect() {
                     ing
                   </span>
                 </h1>
-                <p className="text-sm md:text-base text-[--color-foreground-muted] mt-1 mb-1.5 leading-[1.6] text-center">
+                <p className="text-[15px] md:text-base text-[--color-foreground]/90 mt-1 mb-1.5 leading-[1.7] text-center max-w-prose mx-auto">
                   {t("pageSubtitle", {
                     default:
                       "Executive – Unternehmer, Innovator, Sanierer, Mentor & Forscher",
                   })}
                 </p>
                 {/* Meta-Zeile: Availability • WorkMode • Location */}
-                <div className="text-[12px] md:text-[13px] text-[--color-foreground] opacity-80 md:opacity-75 tracking-[0.01em] leading-tight mt-1 flex items-center md:justify-center justify-center gap-1.5">
+                <div className="text-[13px] md:text-[13px] text-[--color-foreground] opacity-90 md:opacity-80 tracking-[0.01em] leading-relaxed mt-1 flex flex-wrap items-center md:justify-center justify-center gap-x-2 gap-y-1">
                   <span>{t("availability", { default: "Verfügbar: Teilzeit · Projektbasis" })}</span>
                   <span className="opacity-40" aria-hidden>•</span>
                   <span>{t("workMode", { default: "Remote‑first | DACH" })}</span>
@@ -130,10 +139,10 @@ export default async function LebenslaufRedirect() {
                   const email = t('contact.email', { default: 'ismet@mesic.dev' });
                   const location = t('location', { default: 'Wien, AT' });
                   return (
-                    <div className="mt-1.5 flex flex-wrap items-center md:justify-center justify-center gap-1.5 text-[11px] md:text-[12px] text-[--color-foreground]">
+                    <div className="mt-2 flex flex-wrap items-center md:justify-center justify-center gap-2 text-[12px] md:text-[12px] text-[--color-foreground]">
                       <a
                         href={`mailto:${email}`}
-                        className="hover:text-[--color-primary] transition-colors underline-offset-2 hover:underline"
+                        className="hover:text-[--color-primary] transition-colors underline-offset-2 hover:underline px-1 py-0.5 rounded"
                         aria-label={`${t('contact.open', { default: 'Öffnen:' })} ${email}`}
                         title={email}
                       >
@@ -208,41 +217,93 @@ export default async function LebenslaufRedirect() {
         <CVTimeline compactLevel="sm" techPriority={false} deckMode={false} deckScrollLinked={false} showHeading={true} />
       </section>
 
-      {/* Skills & Sprachen */}
-      <section id="cv-skills" className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-3.5">
-        {/* Skills */}
-        <div className="bg-[--color-surface] rounded-xl p-3.5 md:p-5 ring-1 ring-[--color-border-subtle]">
-          <h2 className="text-sm md:text-lg font-semibold text-[--color-foreground-strong] mb-2">{t('skills.title', { default: 'Expertise & Technologies' })}</h2>
-          <div className="space-y-2">
-            {skillsCategories.map((cat, i) => (
-              <div key={`${cat.name}-${i}`}> 
-                <h3 className="text-[13px] font-medium text-[--color-foreground-strong] mb-1.5">{cat.name}</h3>
-                <div className="flex flex-wrap gap-1.5">
-                  {cat.items.map((it, j) => (
-                    <span
-                      key={`${cat.name}-${j}`}
-                      className="inline-flex items-center gap-1.5 px-1.5 py-[2px] text-[10.5px] rounded-full ring-1 ring-[--color-border-subtle] bg-[--color-surface] hover:bg-[--color-surface-2]/70 text-[--color-foreground]"
-                    >
-                      {it}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ))}
+      {/* Presse & Zitate – Glossar unterhalb der Timeline */}
+      <section id="cv-press-quotes" className="mt-6 md:mt-8 mb-6 md:mb-8 max-w-4xl mx-auto" aria-label={t('press.title', { default: 'Presse & Medien' })}>
+        <div
+          className="rounded-2xl ring-1 ring-[--color-border-subtle] shadow-[0_1px_0_0_color-mix(in_oklab,var(--color-border-strong)_10%,transparent),inset_0_0_0_1px_color-mix(in_oklab,var(--color-border-strong)_14%,transparent)]
+                     bg-[radial-gradient(120%_140%_at_50%_0%,color-mix(in_oklab,var(--color-surface)_90%,transparent)_0%,color-mix(in_oklab,var(--color-surface-2)_94%,transparent)_75%)]
+                     dark:bg-[radial-gradient(120%_140%_at_50%_0%,color-mix(in_oklab,var(--color-surface)_86%,transparent)_0%,color-mix(in_oklab,var(--color-surface-2)_90%,transparent)_75%)]
+                     backdrop-blur-[1.5px]"
+        >
+          <div className="px-3.5 md:px-5 pt-3 md:pt-4">
+            <h2
+              className="text-[11.5px] md:text-[12.5px] font-medium tracking-[0.14em] uppercase text-[--color-foreground-strong]
+                         inline-flex items-center gap-2"
+            >
+              <span className="inline-flex h-[18px] w-[18px] items-center justify-center rounded-full 
+                               bg-[--color-surface] ring-1 ring-[--color-border-subtle] text-emerald-500/90">
+                <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5" aria-hidden><path d="M7.5 3C4.462 3 2 5.462 2 8.5S4.462 14 7.5 14c.276 0 .5-.224.5-.5v-2c0-.276-.224-.5-.5-.5-1.657 0-3-1.343-3-3S5.843 4.5 7.5 4.5c.276 0 .5-.224.5-.5v-1c0-.276-.224-.5-.5-.5Zm7 0C11.462 3 9 5.462 9 8.5s2.462 5.5 5.5 5.5c.276 0 .5-.224.5-.5v-2c0-.276-.224-.5-.5-.5-1.657 0-3-1.343-3-3s1.343-3 3-3c.276 0 .5-.224.5-.5v-1c0-.276-.224-.5-.5-.5Z"/></svg>
+              </span>
+              {t('press.title', { default: 'Presse & Medien' })}
+            </h2>
           </div>
-          <PrintButton className="bg-transparent hover:bg-[--muted]/40 ring-1 ring-[--color-border-subtle] text-[--color-foreground-muted] hover:text-[--color-foreground]" />
+          <div className="mx-3.5 md:mx-5 mt-2 h-px 
+                       [background:color-mix(in_oklab,var(--color-border-strong)_50%,transparent)]/60" aria-hidden />
+          <div className="px-3.5 md:px-5 py-3 md:py-4 space-y-3.5">
+            <blockquote
+              className="relative rounded-lg ring-1 ring-[--color-border-subtle] bg-[--color-surface] 
+                         [box-shadow:0_0.5px_0_0_color-mix(in_oklab,var(--color-border-strong)_10%,transparent)]
+                         p-3 md:p-3.5 text-[12px] md:text-[13px] leading-relaxed"
+            >
+              <div className="absolute -left-2 -top-2 h-6 w-6 rounded-md overflow-hidden ring-1 ring-[--color-border-subtle]" aria-hidden>
+                <Image src="/press-logos/heute.svg" alt="Heute.at" fill sizes="24px" className="object-cover opacity-80 [filter:grayscale(100%)]" />
+              </div>
+              <p className="text-[--color-foreground] italic">
+                „Das Kampf‑Event des Jahres <strong>Sparta 3</strong> steigt am 7. Oktober 2023 in der <strong>Wiener Stadthalle</strong>."
+              </p>
+              <cite className="block mt-2 text-[11px] opacity-75">
+                Quelle: <a href="https://www.heute.at/s/ps-treffen-kaempfe-gewinne-karten-fuers-sparta-finale-100292750" target="_blank" rel="noopener noreferrer" className="underline decoration-dotted underline-offset-2 hover:decoration-solid">Heute.at</a>, 22.09.2023
+              </cite>
+            </blockquote>
+
+            <blockquote
+              className="relative rounded-lg ring-1 ring-[--color-border-subtle] bg-[--color-surface] 
+                         [box-shadow:0_0.5px_0_0_color-mix(in_oklab,var(--color-border-strong)_10%,transparent)]
+                         p-3 md:p-3.5 text-[12px] md:text-[13px] leading-relaxed"
+            >
+              <div className="absolute -left-2 -top-2 h-6 w-6 rounded-md overflow-hidden ring-1 ring-[--color-border-subtle]" aria-hidden>
+                <Image src="/press-logos/stadthalle.svg" alt="Wiener Stadthalle" fill sizes="24px" className="object-cover opacity-80 [filter:grayscale(100%)]" />
+              </div>
+              <p className="text-[--color-foreground] italic">
+                „Das <strong>Sparta MMA</strong> Event feiert seine <strong>Premiere in der Wiener Stadthalle</strong> … eine Nacht der Superlative!“
+              </p>
+              <cite className="block mt-2 text-[11px] opacity-75">
+                Quelle: <a href="https://www.stadthalle.com/de/events/alle-events/50347/Sparta-MMA" target="_blank" rel="noopener noreferrer" className="underline decoration-dotted underline-offset-2 hover:decoration-solid">Wiener Stadthalle</a>, 07.10.2023
+              </cite>
+            </blockquote>
+
+            <blockquote
+              className="relative rounded-lg ring-1 ring-[--color-border-subtle] bg-[--color-surface] 
+                         [box-shadow:0_0.5px_0_0_color-mix(in_oklab,var(--color-border-strong)_10%,transparent)]
+                         p-3 md:p-3.5 text-[12px] md:text-[13px] leading-relaxed"
+            >
+              <div className="absolute -left-2 -top-2 h-6 w-6 rounded-md overflow-hidden ring-1 ring-[--color-border-subtle]" aria-hidden>
+                <Image src="/press-logos/krone.svg" alt="Kronen Zeitung" fill sizes="24px" className="object-cover opacity-80 [filter:grayscale(100%)]" />
+              </div>
+              <p className="text-[--color-foreground] italic">
+                „Die <strong>Spartaner</strong> haben bislang <strong>über 20.000 Fans</strong> in die Arenen gelockt – allein im Oktober kamen <strong>8.000 Zuschauer</strong> in die <strong>Wiener Stadthalle</strong>."
+              </p>
+              <cite className="block mt-2 text-[11px] opacity-75">
+                Quelle: <a href="https://www.krone.at/3552941" target="_blank" rel="noopener noreferrer" className="underline decoration-dotted underline-offset-2 hover:decoration-solid">Kronen Zeitung (Krone+)</a>
+              </cite>
+            </blockquote>
+          </div>
         </div>
-        {/* Sprachen */}
-        <div className="bg-[--color-surface] rounded-xl p-3.5 md:p-5 ring-1 ring-[--color-border-subtle]">
-          <h2 className="text-sm md:text-lg font-semibold text-[--color-foreground-strong] mb-2">{t('languages.title', { default: 'Languages' })}</h2>
-          <div className="space-y-1.5">
-            {languages.map((lng, i) => (
-              <div key={`${lng.name}-${i}`} className="flex items-center justify-between p-1.5 rounded-md ring-1 ring-[--color-border-subtle] bg-[--color-surface-2]">
-                <span className="text-[13px] text-[--color-foreground-strong]">{lng.name}</span>
-                <span className="px-2 py-[2px] text-[11px] rounded bg-[--color-surface] ring-1 ring-[--color-border-subtle] text-[--color-foreground]">{lng.level}</span>
-              </div>
-            ))}
-          </div>
+      </section>
+
+      {/* Skills & Sprachen – überarbeitet: edleres, barrierefreies Layout */}
+      <section
+        id="cv-skills"
+        className="mt-8 md:mt-10 max-w-6xl mx-auto"
+        aria-label={t('skills.title', { default: 'Kenntnisse & Fähigkeiten' })}
+      >
+        <div
+          className="rounded-2xl ring-1 ring-[--color-border-subtle] shadow-[0_1px_0_0_color-mix(in_oklab,var(--color-border-strong)_10%,transparent),inset_0_0_0_1px_color-mix(in_oklab,var(--color-border-strong)_14%,transparent)]
+                     bg-[radial-gradient(120%_140%_at_50%_0%,color-mix(in_oklab,var(--color-surface)_90%,transparent)_0%,color-mix(in_oklab,var(--color-surface-2)_94%,transparent)_75%)]
+                     dark:bg-[radial-gradient(120%_140%_at_50%_0%,color-mix(in_oklab,var(--color-surface)_86%,transparent)_0%,color-mix(in_oklab,var(--color-surface-2)_90%,transparent)_75%)]
+                     backdrop-blur-[1.5px] px-3.5 md:px-5 py-4 md:py-6"
+        >
+          <CVSkills skills={skillsCategories} languages={languages} />
         </div>
       </section>
 
