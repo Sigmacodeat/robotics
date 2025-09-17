@@ -16,6 +16,7 @@ jobs:
     env:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -33,10 +34,36 @@ jobs:
       - name: Verify Vercel CLI auth
         run: npx vercel --version
 
-      - name: Deploy to Vercel (cloud build)
+      - name: Link project (no prompt)
         run: |
-          npx vercel \
+          npx vercel link --yes \
+            --cwd=. \
+            --project=$VERCEL_PROJECT_ID \
+            --scope=$VERCEL_ORG_ID \
+            --token=$VERCEL_TOKEN
+
+      - name: Pull Vercel Environment Information
+        run: |
+          npx vercel pull --yes \
+            --environment=production \
+            --cwd=. \
+            --project=$VERCEL_PROJECT_ID \
+            --scope=$VERCEL_ORG_ID \
+            --token=$VERCEL_TOKEN
+
+      - name: Install dependencies
+        working-directory: .
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        working-directory: .
+        run: pnpm build
+
+      - name: Deploy to Vercel (prebuilt)
+        run: |
+          npx vercel deploy --prebuilt \
             --prod \
             --cwd=. \
-            --token=$VERCEL_TOKEN \
-            --project=$VERCEL_PROJECT_ID
+            --project=$VERCEL_PROJECT_ID \
+            --scope=$VERCEL_ORG_ID \
+            --token=$VERCEL_TOKEN
