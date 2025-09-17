@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
-import { useMessages, useTranslations } from "next-intl";
+import { useMessages, useTranslations, useLocale } from "next-intl";
 import { z } from "zod";
 import TimelineEventCard from "@/components/chapters/timeline/TimelineEventCard";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -81,6 +81,7 @@ export const CVTimeline: React.FC<CVTimelineProps> = ({ items, compact, compactL
         setSegment(fromUrl as 'all' | 'work' | 'education');
         return;
       }
+
       const ls = typeof window !== 'undefined' ? window.localStorage.getItem('cvSegment') : null;
       if (ls === 'all' || ls === 'work' || ls === 'education') setSegment(ls as any);
     } catch {}
@@ -508,6 +509,7 @@ type PerfItem = {
   employees?: number;
   description: string;
   series?: number[];
+  startCapital?: number;
 };
 
 const PerfArraySchema = z.array(
@@ -519,6 +521,7 @@ const PerfArraySchema = z.array(
     employees: z.number().optional(),
     description: z.string(),
     series: z.array(z.number()).optional(),
+    startCapital: z.number().optional(),
   })
 );
 
@@ -562,12 +565,37 @@ export const TimelineSparkline: React.FC<{ title: string; subtitle?: string; act
     const hay = `${title} ${subtitle ?? ''}`;
     return perf.find((p) => hay.includes(p.company));
   }, [perf, title, subtitle]);
+  const isMediStore = useMemo(() => {
+    const hay = (match?.company ?? subtitle ?? title).toLowerCase();
+    return hay.includes('medistore') || hay.includes('medstore');
+  }, [match, subtitle, title]);
+  const isKryptoMix = useMemo(() => {
+    const hay = `${title} ${subtitle ?? ''}`.toLowerCase();
+    return hay.includes('krypto') && hay.includes('mining');
+  }, [title, subtitle]);
+  const isMscinvest = useMemo(() => {
+    const hay = (match?.company ?? subtitle ?? title).toLowerCase();
+    return hay.includes('mscinvest');
+  }, [match, subtitle, title]);
+  const isCoin2Cash = useMemo(() => {
+    const hay = (match?.company ?? subtitle ?? title).toLowerCase();
+    return hay.includes('coin2cash');
+  }, [match, subtitle, title]);
 
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
   const rafRef = React.useRef<number | null>(null);
   const startRef = React.useRef<number | null>(null);
   const wrapperRef = React.useRef<HTMLDivElement | null>(null);
   const inView = useInView(wrapperRef, { once: false, margin: '-20% 0px -20% 0px' });
+  // Trigger Neuzeichnen bei Größenänderung
+  const [resizeTick, setResizeTick] = React.useState(0);
+  React.useEffect(() => {
+    const el = wrapperRef.current ?? canvasRef.current; if (!el) return;
+    if (typeof ResizeObserver === 'undefined') return;
+    const ro = new ResizeObserver(() => setResizeTick((n) => n + 1));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   React.useEffect(() => {
     const canvas = canvasRef.current; if (!canvas) return;
@@ -597,32 +625,325 @@ export const TimelineSparkline: React.FC<{ title: string; subtitle?: string; act
     const usableW = width - padX * 2 - 2;
     const Hdraw = height - padTop - padBottom;
     const denom = 1000; // fester Maßstab 0..1000%
+
+    // Zeitachsen‑Mapping: Linie soll bei tatsächlichem Periodenende enden (z. B. Feb 2024),
+    // auch wenn die X‑Achse (Labels) bis 2025 erweitert ist.
+    const parseMYLocal = (s?: string) => {
+      if (!s) return null as null | { m: number; y: number };
+      const rx = /(\d{1,2})\/(\d{4})/;
+      const m = rx.exec(s);
+      if (!m) return null;
+      const mm = Math.max(1, Math.min(12, parseInt(m[1]!, 10)));
+      const yy = parseInt(m[2]!, 10);
+      return { m: mm, y: yy };
+    };
+
+    // Versuche Perioden-Parsing aus match.period (z. B. "05/2022–02/2024")
+    let startMY_local: { m: number; y: number } | null = null;
+    let endMY_local: { m: number; y: number } | null = null;
+    if (typeof match?.period === 'string') {
+      const parts = match.period.split(/\s*[–-]\s*/);
+      startMY_local = parseMYLocal(parts[0]);
+      endMY_local = parseMYLocal(parts[1]);
+    }
+
+    // Realer Zeitraum (Linien-Daten) und Achsen-Zeitraum (Labels, ggf. bis 2025 erweitert)
+    const totalMonthsReal = (startMY_local && endMY_local)
+      ? ((endMY_local.y - startMY_local.y) * 12 + (endMY_local.m - startMY_local.m))
+      : null;
+    const endYearFromX_forLine = (xLabels && xLabels[1]) ? parseInt(xLabels[1], 10) : NaN;
+    const endMY_axis = (startMY_local && endMY_local && !Number.isNaN(endYearFromX_forLine) && Number.isFinite(endYearFromX_forLine) && endYearFromX_forLine > endMY_local.y)
+      ? { m: 12, y: endYearFromX_forLine }
+      : endMY_local;
+    const totalMonthsAxis = (startMY_local && endMY_axis)
+      ? ((endMY_axis.y - startMY_local.y) * 12 + (endMY_axis.m - startMY_local.m))
+      : totalMonthsReal;
+
     const pts = relClamped.map((p, i) => {
-      const x = padX + (i / Math.max(1, n - 1)) * usableW;
-      const norm = (p - relMin) / denom; // 0..1 innerhalb [-1000,1000] Fenster
+      // X‑Position: wenn Start/Ende bekannt, Punkte relativ zum ACHSEN-Zeitraum platzieren
+      let xRel = (i / Math.max(1, n - 1));
+      if (totalMonthsReal !== null && totalMonthsReal > 0 && startMY_local && (totalMonthsAxis ?? 0) > 0) {
+        const monthPos = Math.round(xRel * totalMonthsReal); // 0..totalMonthsReal (letzter Punkt = reales Ende)
+        // Auf Achsen-Ende normalisieren (z. B. bis Dez 2025), damit die Linie bei Feb 2024 vor 2025 endet
+        xRel = monthPos / (totalMonthsAxis as number);
+      }
+      const x = padX + xRel * usableW;
+      const norm = (p - relMin) / denom; // 0..1 innerhalb 0..1000
       const y = padTop + (1 - norm) * Hdraw;
       return { x, y };
     });
 
-    const grad = ctx.createLinearGradient(padX, 0, width - padX, 0);
-    if ((match?.growth ?? 0) >= 0) { grad.addColorStop(0, '#10b981'); grad.addColorStop(1, '#059669'); }
-    else { grad.addColorStop(0, '#ef4444'); grad.addColorStop(1, '#b91c1c'); }
+    // Optionales Re-Positionieren des Endpunkts: Nutzerwunsch – zwischen 2024 und 2025 visualisieren
+    // Nur für Cutting Edge und wenn Achsenzeitraum bis 2025 reicht.
+    let desiredEndX = width - padX; // default wird später mit rightGutter zu xStop präzisiert
+    let xDesiredForFirst: number | null = null;
+    if (match?.company?.includes('Cutting Edge') && startMY_local && (totalMonthsAxis ?? 0) > 0 && xLabels?.[1] === '2025') {
+      // Ziel: exakte Mitte zwischen 2024 und 2025 => 2024.5 ~ Juli 2024 (Monat 7)
+      const desired = { m: 7, y: 2024 };
+      const monthsFromStartToDesired = (desired.y - startMY_local.y) * 12 + (desired.m - startMY_local.m);
+      const tDesired = Math.max(0, Math.min(1, monthsFromStartToDesired / (totalMonthsAxis as number)));
+      const xDesired = padX + tDesired * usableW;
+      xDesiredForFirst = xDesired;
+      // Verschiebe nur die letzte Punkt-X-Position; Y bleibt durch growth bestimmt
+      const lastIdx = pts.length - 1;
+      if (lastIdx >= 0) {
+        pts[lastIdx] = { x: xDesired, y: pts[lastIdx].y };
+      }
+    }
 
-    const easeOutCubic = (tt: number) => 1 - Math.pow(1 - tt, 3);
+    // Dezente, einheitliche Farbwahl ohne Verlauf
+    const strokeColor = (match?.growth ?? 0) >= 0 ? 'rgba(16,185,129,0.85)' : 'rgba(239,68,68,0.85)';
+    const badgeFillColor = (match?.growth ?? 0) >= 0 ? 'rgba(16,185,129,0.10)' : 'rgba(239,68,68,0.10)';
+    const badgeStrokeColor = (match?.growth ?? 0) >= 0 ? 'rgba(16,185,129,0.45)' : 'rgba(239,68,68,0.45)';
+
+    // Sanftere Ease-Funktion für ein dezentes Draw-On
+    const easeInOutSine = (tt: number) => 0.5 * (1 - Math.cos(Math.PI * tt));
+    // Kompatibilitäts-Alias für bestehende Spezialfälle
+    const easeOutCubic = easeInOutSine;
 
     const draw = (tt: number) => {
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.scale(dpr, dpr);
       ctx.clearRect(0, 0, width, height);
 
-      // Linie
-      ctx.strokeStyle = grad;
-      ctx.lineWidth = 1.8;
+      const prog = easeInOutSine(tt);
+
+      // Spezialfall: MediStore – runder Fortschritts‑Kreis bis 100% + Veredelungen
+      if (isMediStore) {
+        const cx = width / 2;
+        const cy = (height - padBottom + padTop) / 2 - 6; // etwas weiter nach oben für mehr Abstand
+        const r = Math.min(width, height) * 0.28;
+        // Hintergrund‑Ring
+        ctx.save();
+        ctx.strokeStyle = 'rgba(34,197,94,0.18)';
+        ctx.lineWidth = 8;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.stroke();
+        // Fortschritt (0..100%)
+        ctx.strokeStyle = '#10b981';
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        const start = -Math.PI / 2;
+        const end = start + (Math.PI * 2) * prog; // bis 100%
+        ctx.arc(cx, cy, r, start, end);
+        ctx.stroke();
+        // Sanfter Outline‑Puls (0..1) am Rand
+        const pulse = Math.pow(prog, 0.6);
+        ctx.save();
+        ctx.globalAlpha = 0.25 * pulse;
+        ctx.strokeStyle = '#10b981';
+        ctx.lineWidth = 12;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r + 2, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+        // Glühender Tip
+        const tipX = cx + r * Math.cos(end);
+        const tipY = cy + r * Math.sin(end);
+        const rad = ctx.createRadialGradient(tipX, tipY, 0, tipX, tipY, 10);
+        rad.addColorStop(0, 'rgba(255,255,255,0.95)');
+        rad.addColorStop(0.35, 'rgba(16,185,129,0.85)');
+        rad.addColorStop(1, 'rgba(16,185,129,0.0)');
+        ctx.fillStyle = rad;
+        ctx.beginPath();
+        ctx.arc(tipX, tipY, 10, 0, Math.PI * 2);
+        ctx.fill();
+        // Text +100% in der Mitte (Count‑Up)
+        const shown = Math.round(100 * prog);
+        const pctText = `+${nfIntAT.format(shown)}%`;
+        ctx.fillStyle = '#10b981';
+        ctx.font = 'bold 16px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(pctText, cx, cy);
+        // Untertitel „IT‑Audit ApoSys“
+        ctx.fillStyle = 'rgba(148,163,184,0.85)';
+        ctx.font = '11px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial';
+        ctx.fillText('IT‑Audit ApoSys', cx, cy + r + 22);
+        // Zeitraum (exakt wie angegeben, z. B. 08/2022 – 05/2023)
+        const rawPeriod = (match?.period ?? '').trim();
+        const periodText = rawPeriod || '08/2022 – 05/2023';
+        ctx.fillStyle = 'rgba(148,163,184,0.75)';
+        ctx.font = '10.5px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial';
+        ctx.fillText(`Zeitraum ${periodText}`, cx, cy + r + 40);
+        ctx.restore();
+        return; // keine Achsen/Skalen im MediStore‑Modus
+      }
+
+      // Spezialfall: Krypto & Mining – Donut „Investitionsmix“ (2,6 Mio. € = 2,0 + 0,6)
+      if (isKryptoMix) {
+        const cx = width / 2;
+        const cy = (height - padBottom + padTop) / 2 - 6;
+        const r = Math.min(width, height) * 0.28;
+        const total = 2.6;
+        const lulea = 2.0;
+        const priboj = 0.6;
+        const aStart = -Math.PI / 2;
+        const fracL = lulea / total; // ~0.769
+        const fracP = priboj / total; // ~0.231
+        const prog = easeOutCubic(tt);
+        const sweep = (Math.PI * 2) * Math.max(0.0001, Math.min(1, prog));
+        // Hintergrundring
+        ctx.save();
+        ctx.strokeStyle = 'rgba(148,163,184,0.16)';
+        ctx.lineWidth = 8;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.stroke();
+        // Segment 1 (Luleå) – Grün
+        ctx.strokeStyle = '#10b981';
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        const endL = aStart + sweep * fracL;
+        ctx.arc(cx, cy, r, aStart, endL);
+        ctx.stroke();
+        // Segment 2 (Priboj) – Türkisgrün
+        ctx.strokeStyle = '#34d399';
+        ctx.beginPath();
+        const endP = endL + sweep * fracP;
+        ctx.arc(cx, cy, r, endL, endP);
+        ctx.stroke();
+        // Zentrumstext: Gesamt
+        ctx.fillStyle = '#10b981';
+        ctx.font = 'bold 15px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('2,6 Mio. €', cx, cy);
+        // Legende / KPI-Badges
+        ctx.fillStyle = 'rgba(148,163,184,0.85)';
+        ctx.font = '11px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial';
+        ctx.fillText('Investitionsmix', cx, cy + r + 18);
+        ctx.fillStyle = 'rgba(148,163,184,0.75)';
+        ctx.font = '10.5px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial';
+        ctx.fillText('Luleå 2,0 Mio. €  •  Priboj 0,6 Mio. €', cx, cy + r + 32);
+        // Kleine KPI-Zeile
+        ctx.fillStyle = 'rgba(148,163,184,0.70)';
+        ctx.font = '10px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial';
+        ctx.fillText('Projekte 4   •   Regionen 2   •   Rollen 3', cx, cy + r + 46);
+        ctx.restore();
+        return; // keine Achsen/Skalen im Krypto‑Mix‑Modus
+      }
+
+      // Spezialfall: mscinvest d.o.o. – Gewinn‑Donut
+      if (isMscinvest) {
+        const cx = width / 2;
+        const cy = (height - padBottom + padTop) / 2 - 4;
+        const r = Math.min(width, height) * 0.28;
+        const prog = easeOutCubic(tt);
+        // Hintergrundring
+        ctx.save();
+        ctx.strokeStyle = 'rgba(34,197,94,0.18)';
+        ctx.lineWidth = 8;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.stroke();
+        // Fortschrittsring (bis 100%)
+        ctx.strokeStyle = '#10b981';
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        const start = -Math.PI / 2;
+        const end = start + (Math.PI * 2) * Math.max(0.0001, Math.min(1, prog));
+        ctx.arc(cx, cy, r, start, end);
+        ctx.stroke();
+        // Zentrumstext: kompakt und auto-fit innerhalb des Kreises
+        ctx.fillStyle = '#10b981';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        const centerText = '0,8 Mio. €';
+        let fontSize = 16; // Startgröße
+        const family = "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
+        const maxWidth = (r - 8) * 2; // etwas Innenabstand
+        // Auto-Fit-Schleife (max. 10 Schritte)
+        for (let i = 0; i < 10; i++) {
+          ctx.font = `bold ${fontSize}px ${family}`;
+          const w = ctx.measureText(centerText).width;
+          if (w <= maxWidth) break;
+          fontSize -= 1;
+          if (fontSize < 10) break;
+        }
+        ctx.font = `bold ${fontSize}px ${family}`;
+        ctx.fillText(centerText, cx, cy);
+        // Untertitel & Zeitraum
+        ctx.fillStyle = 'rgba(148,163,184,0.85)';
+        ctx.font = '11px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial';
+        ctx.fillText('Beratung/Compliance (keine Spekulationen)', cx, cy + r + 20);
+        const period = (match?.period ?? '').trim() || '2017 – 2020';
+        ctx.fillStyle = 'rgba(148,163,184,0.75)';
+        ctx.font = '10.5px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial';
+        ctx.fillText(`Zeitraum ${period}`, cx, cy + r + 34);
+        ctx.restore();
+        return;
+      }
+      
+      // Spezialfall: coin2cash s.r.o. – eleganter, kompakter Kreis "Networking done"
+      if (isCoin2Cash) {
+        const cx = width / 2;
+        const cy = (height - padBottom + padTop) / 2 - 4;
+        const r = Math.min(width, height) * 0.26; // etwas kompakter
+        const prog = easeOutCubic(tt);
+        // Hintergrundring (dezenter, dünner)
+        ctx.save();
+        ctx.strokeStyle = 'rgba(148,163,184,0.16)';
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.stroke();
+        // Fortschrittsring bis 100% (einheitliches Grün)
+        ctx.strokeStyle = '#10b981';
+        ctx.lineCap = 'round';
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        const start = -Math.PI / 2;
+        const end = start + (Math.PI * 2) * Math.max(0.0001, Math.min(1, prog));
+        ctx.arc(cx, cy, r, start, end);
+        ctx.stroke();
+        // Subtiler Glow am Fortschrittspunkt
+        const tipX = cx + r * Math.cos(end);
+        const tipY = cy + r * Math.sin(end);
+        const grad = ctx.createRadialGradient(tipX, tipY, 0, tipX, tipY, 9);
+        grad.addColorStop(0, 'rgba(255,255,255,0.95)');
+        grad.addColorStop(0.35, 'rgba(16,185,129,0.85)');
+        grad.addColorStop(1, 'rgba(16,185,129,0.0)');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(tipX, tipY, 9, 0, Math.PI * 2);
+        ctx.fill();
+        // Center-Text: auto-fit, mittel-stark, sehr kompakt
+        ctx.fillStyle = '#10b981';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        const txt = 'Networking done';
+        let fs = 13; // Startgröße etwas kleiner
+        const fam = "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
+        const maxW = (r - 10) * 2;
+        for (let i = 0; i < 12; i++) {
+          ctx.font = `600 ${fs}px ${fam}`; // semi-bold
+          if (ctx.measureText(txt).width <= maxW) break;
+          fs -= 1; if (fs < 10) break;
+        }
+        ctx.font = `600 ${fs}px ${fam}`;
+        ctx.fillText(txt, cx, cy);
+        // Untertitel & Zeitraum
+        ctx.fillStyle = 'rgba(148,163,184,0.85)';
+        ctx.font = '11px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial';
+        ctx.fillText('Netzwerk/Partner aufgebaut', cx, cy + r + 20);
+        const periodC2C = (match?.period ?? '').trim() || '2017 – 2019';
+        ctx.fillStyle = 'rgba(148,163,184,0.75)';
+        ctx.font = '10.5px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial';
+        ctx.fillText(`Zeitraum ${periodC2C}`, cx, cy + r + 34);
+        ctx.restore();
+        return;
+      }
+
+      // Linie – dezent, ohne Glow/Verlauf
+      ctx.strokeStyle = strokeColor;
+      ctx.lineWidth = 1.6;
       ctx.lineCap = 'round';
       ctx.beginPath();
       const totalLen = n - 1;
-      const prog = easeOutCubic(tt);
-      const segF = Math.min(totalLen, prog * totalLen);
+      const progLine = prog;
+      const segF = Math.min(totalLen, progLine * totalLen);
       const segI = Math.floor(segF);
       const frac = segF - segI;
 
@@ -635,59 +956,54 @@ export const TimelineSparkline: React.FC<{ title: string; subtitle?: string; act
       ctx.restore();
       const rightGutter = Math.max(28, pctWidth + 10);
       const xStop = width - padX - rightGutter;
+      // Nur für die erste Linie (Cutting Edge mit 2025 als rechtem Label) soll der End‑X von Beginn an am Wunsch‑Punkt liegen
+      const endX = (xDesiredForFirst != null) ? Math.min(xStop, Math.max(padX, xDesiredForFirst)) : xStop;
+      // Endpunkt-Höhe exakt aus Ziel-Prozentwert ableiten (anstatt aus Segmentinterpolation),
+      // damit der grüne Punkt genau auf der erwarteten Y-Position liegt – unabhängig vom Kappen rechts.
+      const normFinal = Math.max(0, Math.min(1, (percentVal - 0) / 1000));
+      const yFinal = padTop + (1 - normFinal) * Hdraw;
 
       ctx.moveTo(pts[0].x, pts[0].y);
       for (let i = 1; i <= segI; i++) {
         const p = pts[i];
-        if (p.x <= xStop) ctx.lineTo(p.x, p.y);
+        if (p.x <= endX) ctx.lineTo(p.x, p.y);
       }
       let tip = pts[Math.min(segI, pts.length - 1)];
       if (segI < totalLen) {
-        const a = pts[segI], b = pts[segI + 1];
-        let ix = a.x + (b.x - a.x) * frac;
-        let iy = a.y + (b.y - a.y) * frac;
-        if (ix > xStop) {
-          const denomX = (b.x - a.x) || 1e-6;
-          const tAlong = Math.max(0, Math.min(1, (xStop - a.x) / denomX));
-          ix = xStop;
-          iy = a.y + (b.y - a.y) * tAlong;
-        }
+        const a = pts[segI];
+        const isLast = segI === pts.length - 2;
+        const bx = isLast ? endX : pts[segI + 1].x;
+        const by = isLast ? yFinal : pts[segI + 1].y;
+        let ix = a.x + (bx - a.x) * frac;
+        let iy = a.y + (by - a.y) * frac;
+        if (ix > endX) { ix = endX; if (!isLast) {
+          // Falls außerhalb im vorletzten Segment gekappt wird (selten),
+          // Höhe linear zwischen a.y und by bestimmen
+          const denomX = (bx - a.x) || 1e-6;
+          const tAlong = Math.max(0, Math.min(1, (endX - a.x) / denomX));
+          iy = a.y + (by - a.y) * tAlong;
+        } }
         ctx.lineTo(ix, iy);
         tip = { x: ix, y: iy };
       } else {
-        // letztes Segment erreicht – ggf. bis xStop kappen
+        // letztes Segment vollständig – sanft zum Ziel (xStop, yFinal)
         const last = pts[pts.length - 1];
-        const prev = pts[Math.max(0, pts.length - 2)];
-        if (last.x > xStop) {
-          const denomX = (last.x - prev.x) || 1e-6;
-          const tAlong = Math.max(0, Math.min(1, (xStop - prev.x) / denomX));
-          const ix = xStop;
-          const iy = prev.y + (last.y - prev.y) * tAlong;
-          ctx.lineTo(ix, iy);
-          tip = { x: ix, y: iy };
+        if (last.x >= endX) {
+          ctx.lineTo(endX, yFinal);
+          tip = { x: endX, y: yFinal };
         } else {
           ctx.lineTo(last.x, last.y);
           tip = { x: last.x, y: last.y };
         }
       }
       ctx.stroke();
-
+      // Dezenter Endpunkt ohne Glow
       ctx.save();
-      ctx.shadowColor = 'rgba(16,185,129,0.70)';
-      ctx.shadowBlur = 18;
-      ctx.fillStyle = '#34d399';
+      ctx.fillStyle = strokeColor;
       ctx.beginPath();
-      ctx.arc(tip.x, tip.y, 3.2, 0, Math.PI * 2);
+      ctx.arc(tip.x, tip.y, 2.4, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
-      const rad = ctx.createRadialGradient(tip.x, tip.y, 0, tip.x, tip.y, 8);
-      rad.addColorStop(0, 'rgba(255,255,255,0.95)');
-      rad.addColorStop(0.35, 'rgba(16,185,129,0.85)');
-      rad.addColorStop(1, 'rgba(16,185,129,0.0)');
-      ctx.fillStyle = rad;
-      ctx.beginPath();
-      ctx.arc(tip.x, tip.y, 8, 0, Math.PI * 2);
-      ctx.fill();
 
       // X‑Achse: Jahre + Quartals-/Monats‑Ticks
       ctx.fillStyle = 'rgba(148,163,184,0.75)';
@@ -696,11 +1012,15 @@ export const TimelineSparkline: React.FC<{ title: string; subtitle?: string; act
       // 1) Jahreslabels wie bisher (mit Kollision-Management)
       const placedXs: number[] = [];
       const minGap = 18; // px Mindestabstand zwischen Labels
-      const tryPlaceLabel = (x: number, text: string, align: CanvasTextAlign) => {
-        // vermeide Überdeckung mit rechter Gutter-Zone
+      const tryPlaceLabel = (xIn: number, text: string, align: CanvasTextAlign) => {
+        // vermeide Überdeckung mit rechter Gutter-Zone; rechter Rand darf genutzt werden, jedoch knapp vor xStop
         const rightGutter = Math.max(28, ctx.measureText(`${percent >= 0 ? '+' : ''}${nfIntAT.format(Math.round(Math.max(0, Math.min(1000, percent))))}%`).width + 10);
         const xStop = width - padX - rightGutter;
-        if (x > xStop - 4) return; // nicht in den Prozent-Text laufen
+        let x = xIn;
+        if (align === 'right' && x > xStop) {
+          x = xStop - 1; // rechtsbündig knapp vor der Gutter-Grenze rendern
+        }
+        if (align !== 'right' && x > xStop - 4) return; // linke/zentrierte Labels nicht in den Prozent-Text laufen lassen
         // Kollision prüfen
         for (const px of placedXs) if (Math.abs(px - x) < minGap) return;
         ctx.textAlign = align; ctx.fillText(text, x, height - 6); placedXs.push(x);
@@ -729,54 +1049,27 @@ export const TimelineSparkline: React.FC<{ title: string; subtitle?: string; act
       if (!startMY && xLabels?.[0]) startMY = { m: 1, y: parseInt(xLabels[0], 10) };
       if (!endMY && xLabels?.[1]) endMY = { m: 12, y: parseInt(xLabels[1], 10) };
       if (startMY && endMY && Number.isFinite(startMY.y) && Number.isFinite(endMY.y)) {
-        const totalMonths = (endMY.y - startMY.y) * 12 + (endMY.m - startMY.m);
-        if (totalMonths > 0) {
-          // kleine Monatsticks, größere Quartalsticks, Jahreslabel an Monat=1
-          const baseY0 = height - padBottom + 2.5;
-          const baseY1 = height - padBottom + 6.5;
-          const qY1 = height - padBottom + 9; // längerer Tick für Quartal
-          ctx.strokeStyle = 'rgba(148,163,184,0.22)';
-          ctx.lineWidth = 1;
-          for (let k = 0; k <= totalMonths; k++) {
-            const curMonth = ((startMY.m - 1 + k) % 12) + 1; // 1..12
-            const curYear = startMY.y + Math.floor((startMY.m - 1 + k) / 12);
-            const p = k / totalMonths;
-            const x = padX + p * (width - padX * 2 - 2);
-            // nicht in den reservierten Prozentbereich zeichnen
-            const rightGutter = Math.max(28, ctx.measureText(`${percentVal >= 0 ? '+' : ''}${nfIntAT.format(Math.round(Math.max(0, Math.min(1000, percentVal))))}%`).width + 10);
-            const xStop = width - padX - rightGutter;
-            if (x > xStop - 2) continue;
-            // Monatstck
-            ctx.beginPath();
-            ctx.moveTo(x, baseY0);
-            ctx.lineTo(x, baseY1);
-            ctx.stroke();
-            // Quartalstarts: 1,4,7,10
-            if (curMonth === 1 || curMonth === 4 || curMonth === 7 || curMonth === 10) {
-              ctx.beginPath();
-              ctx.moveTo(x, baseY0);
-              ctx.lineTo(x, qY1);
-              ctx.stroke();
-              // Label Q1..Q4 klein
-              const qIdx = Math.floor((curMonth - 1) / 3) + 1;
-              // Quartalslabel nur setzen, wenn genug Abstand zu bereits platzierten Labels
-              if (!placedXs.some(px => Math.abs(px - x) < minGap)) {
-                ctx.textAlign = 'center';
-                ctx.fillStyle = 'rgba(148,163,184,0.6)';
-                ctx.fillText(`Q${qIdx}`, x, height - 10);
-                placedXs.push(x);
-              }
+        // Endjahr ggf. bis xLabels[1] (z. B. 2025) erweitern
+        const endYearFromX = xLabels?.[1] ? parseInt(xLabels[1], 10) : NaN;
+        const endMYdraw = (!Number.isNaN(endYearFromX) && Number.isFinite(endYearFromX) && endYearFromX > (endMY?.y ?? endYearFromX))
+          ? { m: 12, y: endYearFromX }
+          : endMY;
+        const totalMonthsDraw = (endMYdraw.y - startMY.y) * 12 + (endMYdraw.m - startMY.m);
+        if (totalMonthsDraw > 0) {
+          // Alle Jahreslabels gleichmäßig über die verfügbare Breite [padX .. xStop] verteilen
+          const yearStart = startMY.y;
+          const yearEnd = endMYdraw.y;
+          const rightGutter = Math.max(28, ctx.measureText(`${percentVal >= 0 ? '+' : ''}${nfIntAT.format(Math.round(Math.max(0, Math.min(1000, percentVal))))}%`).width + 10);
+          const xStop = width - padX - rightGutter;
+          const spanYears = Math.max(1, yearEnd - yearStart);
+          for (let y = yearStart; y <= yearEnd; y++) {
+            const t = (y - yearStart) / spanYears; // 0..1
+            const x = padX + t * (xStop - padX);
+            // Äußere Labels links/rechts werden separat gesetzt – mittig keine Duplikate
+            if (y !== parseInt(xLabels?.[0] ?? '', 10) && y !== parseInt(xLabels?.[1] ?? '', 10)) {
+              ctx.textAlign = 'center';
               ctx.fillStyle = 'rgba(148,163,184,0.75)';
-            }
-            // Jahreslabel an Monat 1 (aber die großen Year-Labels stehen schon ganz links/rechts) –
-            // optional mittig anzeigen, wenn nicht am Rand
-            if (curMonth === 1 && curYear !== parseInt(xLabels?.[0] ?? '', 10) && curYear !== parseInt(xLabels?.[1] ?? '', 10)) {
-              if (!placedXs.some(px => Math.abs(px - x) < minGap)) {
-                ctx.textAlign = 'center';
-                ctx.fillStyle = 'rgba(148,163,184,0.75)';
-                ctx.fillText(String(curYear), x, height - 6);
-                placedXs.push(x);
-              }
+              ctx.fillText(String(y), x, height - 6);
             }
           }
         }
@@ -810,18 +1103,57 @@ export const TimelineSparkline: React.FC<{ title: string; subtitle?: string; act
       });
       ctx.restore();
 
-      // Prozent-Label (+XYZ%) auf Höhe der Linien-Spitze rendern
+      // Prozent-Badge: statischer Wert, dezentes Einblenden am Ende
       const pctText = `${percentVal >= 0 ? '+' : ''}${nfIntAT.format(Math.round(Math.max(0, Math.min(1000, percentVal))))}%`;
+      const badgePadX = 6, badgePadY = 3, badgeRadius = 6;
       ctx.save();
-      ctx.textAlign = 'right';
-      ctx.textBaseline = 'middle';
       ctx.font = '12px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial';
-      ctx.fillStyle = (match?.growth ?? 0) >= 0 ? '#10b981' : '#ef4444';
-      ctx.fillText(pctText, width - padX, tip.y);
+      // Badge Position rechts oberhalb des Tips
+      const textW = ctx.measureText(pctText).width;
+      // Position: links oberhalb des Punkts, um nichts zu verdecken
+      let bx = tip.x - (textW + badgePadX * 2) - 12; // links vom Punkt
+      let by = tip.y - 18; // oberhalb
+      // Clamping, damit Badge im Canvas bleibt
+      bx = Math.min(bx, width - padX - (textW + badgePadX * 2) - 2);
+      bx = Math.max(bx, padX + 2);
+      by = Math.max(by, padTop + 2);
+      by = Math.min(by, height - padBottom - 14);
+      const bw = textW + badgePadX * 2;
+      const bh = 18;
+      // Badge erst am Ende dezent einblenden
+      const badgeAlpha = prog < 0.92 ? 0 : Math.min(1, (prog - 0.92) / 0.08);
+      ctx.globalAlpha = badgeAlpha;
+      // Badge-Hintergrund dezent
+      ctx.fillStyle = badgeFillColor;
+      ctx.strokeStyle = badgeStrokeColor;
+      ctx.lineWidth = 1;
+      const rrect = (x:number, y:number, w:number, h:number, r:number) => {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + w - r, y);
+        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+        ctx.lineTo(x + w, y + h - r);
+        ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        ctx.lineTo(x + r, y + h);
+        ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+        ctx.lineTo(x, y + r);
+        ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
+      };
+      rrect(bx, by, bw, bh, badgeRadius);
+      ctx.fill();
+      ctx.stroke();
+      // Text
+      ctx.fillStyle = strokeColor;
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(pctText, bx + badgePadX, by + bh/2);
       ctx.restore();
     };
 
-    const duration = 1100;
+    // Reduced‑motion respektieren
+    const prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const duration = prefersReducedMotion ? 0 : 800;
     const step = (ts: number) => {
       if (startRef.current == null) startRef.current = ts;
       const elapsed = ts - startRef.current;
@@ -829,19 +1161,62 @@ export const TimelineSparkline: React.FC<{ title: string; subtitle?: string; act
       draw(tt);
       if (tt < 1) rafRef.current = requestAnimationFrame(step);
     };
-    const shouldAnimate = (active ?? false) || inView;
+    const shouldAnimate = !prefersReducedMotion && ((active ?? false) || inView);
     if (shouldAnimate) {
       draw(0);
       rafRef.current = requestAnimationFrame(step);
     } else {
-      // außerhalb des Viewports vorerst nichts zeichnen, damit der Effekt erst sichtbar startet
-      draw(0);
+      // Bei reduced‑motion oder außerhalb des Viewports direkt Endzustand zeichnen
+      draw(prefersReducedMotion ? 1 : 0);
     }
     return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); startRef.current = null; rafRef.current = null; };
-  }, [match, title, subtitle, xLabels, active, inView]);
+  }, [match, title, subtitle, xLabels, active, inView, resizeTick]);
 
-  const valueText = match?.value !== undefined ? `${nfDecimalAT.format(match.value)} M€ Firmenwert` : '';
+  const valueText = (() => {
+    if (isKryptoMix) return 'Investitionen gesamt 2,6 Mio. €';
+    if (isMscinvest) return 'Gewinn gesamt 0,8 Mio. € (Beratung/Compliance)';
+    // Für coin2cash bereits zentral im Kreis dargestellt – hier keine Doppelung
+    if (isCoin2Cash) return '';
+    const desc = (match?.description ?? '').toLowerCase();
+    const isProfit = desc.includes('gewinn') || desc.includes('profit');
+    // Speziallabel für Kuhn & Mather: immer "Rendite"
+    const forceRendite = (match?.company ?? '').toLowerCase().includes('kuhn') && (match?.company ?? '').toLowerCase().includes('mather');
+    const isDe = true; // Default: deutsche Labels in der CV-Sektion
+    const label = forceRendite
+      ? (isDe ? 'Rendite' : 'Return')
+      : (isProfit ? (desc.includes('gewinn') ? (isDe ? 'Gewinn' : 'Profit') : 'Profit') : (isDe ? 'Firmenwert' : 'Company value'));
+    const v = match?.value !== undefined ? `${nfDecimalAT.format(match.value)} M€ ${label}` : '';
+    const s = match?.startCapital !== undefined ? ` · Startkapital ${nfDecimalAT.format(match.startCapital)} M€` : '';
+    return `${v}${s}`.trim();
+  })();
   const growthText = match?.growth !== undefined ? `${(match.growth >= 0 ? '+' : '') + nfIntAT.format(match.growth)}%` : '';
+
+  // A11y: sprechendes ARIA‑Label für den Canvas
+  const ariaLabel = (() => {
+    if (isKryptoMix) {
+      return 'Investitionsmix Krypto & Mining: Gesamt 2,6 Mio. Euro; Luleå 2,0 Mio. Euro; Priboj 0,6 Mio. Euro. KPIs: Projekte 4, Regionen 2, Rollen 3.';
+    }
+    if (isMscinvest) {
+      return 'mscinvest d.o.o.: Gewinn gesamt 0,8 Mio. Euro aus Beratung und Compliance, keine Spekulationen. Zeitraum 2017–2020.';
+    }
+    if (isCoin2Cash) {
+      return 'coin2cash s.r.o.: Ziel erreicht – Netzwerk und Partner aufgebaut. Zeitraum 2017–2019.';
+    }
+    const name = match?.company ?? subtitle ?? title;
+    const growth = match?.growth !== undefined ? `${(match.growth >= 0 ? '+' : '') + nfIntAT.format(match.growth)}%` : '';
+    const desc = (match?.description ?? '').toLowerCase();
+    const isProfit = desc.includes('gewinn') || desc.includes('profit');
+    const forceRendite = (match?.company ?? '').toLowerCase().includes('kuhn') && (match?.company ?? '').toLowerCase().includes('mather');
+    const isDe = true; // Default: deutsch
+    const label = forceRendite
+      ? (isDe ? 'Rendite' : 'Return')
+      : (isProfit ? (desc.includes('gewinn') ? (isDe ? 'Gewinn' : 'Profit') : 'Profit') : (isDe ? 'Firmenwert' : 'Company value'));
+    const value = match?.value !== undefined ? `${nfDecimalAT.format(match.value)} M€ ${label}` : '';
+    const sc = typeof match?.startCapital === 'number' ? `Startkapital ${nfDecimalAT.format(match.startCapital)} M€` : '';
+    const per = match?.period ? `Zeitraum ${match.period}` : '';
+    const parts = [name, growth, value, sc, per].filter(Boolean);
+    return parts.join(', ');
+  })();
 
   return (
     <div ref={wrapperRef} className="w-full">
@@ -855,12 +1230,17 @@ export const TimelineSparkline: React.FC<{ title: string; subtitle?: string; act
         </div>
       </div>
       <div className="h-40 bg-transparent ring-0 shadow-none w-full">
-        <canvas ref={canvasRef} width={420} height={160} className="block w-full h-full" />
+        <canvas ref={canvasRef} width={420} height={160} className="block w-full h-full" role="img" aria-label={ariaLabel} />
       </div>
       <div className="mt-1 flex items-center justify-between text-[10.5px] md:text-[11px] text-[--color-foreground]/70">
         <span>{valueText}</span>
-        {typeof match?.employees === 'number' && <span>{nfIntAT.format(match.employees)} MA</span>}
       </div>
+      {/* Fußnote für ROI/Zeitraum (dynamisch, wenn Startkapital vorhanden) */}
+      {typeof match?.startCapital === 'number' && match?.period && (
+        <div className="mt-0.5 text-[10px] md:text-[10.5px] text-[--color-foreground]/60">
+          {`ROI relativ zum Startkapital (${nfDecimalAT.format(match.startCapital)} M€), Zeitraum ${match.period}`}
+        </div>
+      )}
     </div>
   );
 };

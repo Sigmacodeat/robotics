@@ -9,7 +9,7 @@ import BreakEvenChartAnimated, { type BEPoint } from "@charts/BreakEvenChartAnim
 import MultiLineChartAnimated, { type SeriesPoint } from "@charts/MultiLineChartAnimated";
 import WaterfallChartAnimated, { type WaterfallStep } from "@charts/WaterfallChartAnimated";
 import StackedBarAnimated, { type StackedSeries } from "@charts/StackedBarAnimated";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { seriesColors } from "@/components/charts/theme";
 
 export type TableRow = (string | number)[];
@@ -146,6 +146,7 @@ export default function FinanceChapter({
 }) {
   const t = useTranslations();
   const tBp = useTranslations('bp');
+  const locale = useLocale();
   // --- helpers for light formatting ---
   const euroShort = (n: number) => {
     const sign = n < 0 ? "-" : "";
@@ -544,7 +545,37 @@ export default function FinanceChapter({
           )
         ) : null}
       </Subsection>
+
+
+      <Subsection id="finance-riskAnalysis" className="mt-6">
+        <h3 className="font-semibold">Risk Analysis & Contingency Plans</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[
+            { title: 'Technical Risks', items: [
+              'Agent failure: Kubernetes health monitoring',
+              'Latency spikes: FPGA acceleration fallback'
+            ]},
+            { title: 'Market Risks', items: [
+              'B2B pilot program with 3 industrial partners',
+              'Flexible pricing models'
+            ]},
+            { title: 'Financial Risks', items: [
+              '6-month burn rate buffer',
+              'Emergency bridge funding from angels'
+            ]}
+          ].map((cat, i) => (
+            <div key={i} className="border border-[--color-border-subtle] rounded-lg p-3">
+              <h4 className="font-medium mb-2">{cat.title}</h4>
+              <ul className="list-disc pl-5">
+                {cat.items.map((item, j) => (
+                  <li key={j}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </Subsection>
+
     </Chapter>
   );
 }
-

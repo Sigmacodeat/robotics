@@ -272,20 +272,20 @@ export default async function FinancePage() {
   const uofHeaders = Array.isArray(uof?.headers) ? uof.headers! : [];
   const uofRows = Array.isArray(uof?.rows) ? uof.rows! : [];
 
-  // EBITDA by year
-  const ebitda = (messages?.financePlanDetailed?.ebitdaByYear as any) ?? {};
+  // EBITDA by year (from content.financePlanDetailed)
+  const ebitda = (messages?.content?.financePlanDetailed?.ebitdaByYear as any) ?? {};
   const ebitdaHeaders = Array.isArray(ebitda?.headers) ? ebitda.headers : [];
   const ebitdaRows = Array.isArray(ebitda?.rows) ? ebitda.rows : [];
   const ebitdaTitle = String(ebitda?.title ?? (locale.startsWith('de') ? 'EBITDA nach Jahr' : 'EBITDA by year'));
 
-  // CAPEX/OPEX (detailliert) aus financePlanDetailed
-  const capexOpex = (messages?.financePlanDetailed?.capexOpex as any) ?? {};
+  // CAPEX/OPEX (detailliert) aus content.financePlanDetailed
+  const capexOpex = (messages?.content?.financePlanDetailed?.capexOpex as any) ?? {};
   const capexRows: (string|number)[][] = Array.isArray(capexOpex?.CAPEX) ? capexOpex.CAPEX as (string|number)[][] : [];
   const opexRows: (string|number)[][] = Array.isArray(capexOpex?.OPEX) ? capexOpex.OPEX as (string|number)[][] : [];
   const capexOpexHeaders = [tBp('tables.headers.category'), tBp('tables.headers.amount')];
 
-  // Hardware-Breakdown aus costPlan
-  const hardwareBreakdown = (messages?.costPlan?.hardwareBreakdown as any) ?? {};
+  // Hardware-Breakdown aus content.costPlan
+  const hardwareBreakdown = (messages?.content?.costPlan?.hardwareBreakdown as any) ?? {};
   const hwHeaders: string[] = Array.isArray(hardwareBreakdown?.headers) ? hardwareBreakdown.headers as string[] : [];
   const hwRows: (string|number)[][] = Array.isArray(hardwareBreakdown?.rows) ? hardwareBreakdown.rows as (string|number)[][] : [];
   const hwTitle: string = typeof hardwareBreakdown?.title === 'string' ? hardwareBreakdown.title as string : (locale.startsWith('de') ? 'Hardware‑Details (k€)' : 'Hardware details (k€)');
@@ -476,28 +476,6 @@ export default async function FinancePage() {
 
         {/* Use of Funds (Years) */}
         <span id="useOfFunds" className="sr-only" aria-hidden="true" />
-        {uofHeaders.length > 0 && uofRows.length > 0 && (
-          <SectionDelay delayMs={900}>
-            <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
-              <CardHeader className="border-b-0 p-2.5">
-                <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
-                  {`${chapterIndex}.2 – ${tBp('headings.useOfFunds') as string}`}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-2.5 pt-1.5 md:pt-2.5 pb-5">
-                <TableSimple
-                  headers={uofHeaders}
-                  rows={uofRows}
-                  animateRows
-                  stagger={0.03}
-                  zebra
-                  denseRows
-                  emphasizeFirstCol
-                />
-              </CardContent>
-            </Card>
-          </SectionDelay>
-        )}
 
         {/* CAPEX / OPEX (detailliert) */}
         <span id="capexOpex" className="sr-only" aria-hidden="true" />
@@ -530,12 +508,13 @@ export default async function FinancePage() {
         )}
 
         {/* Hardware‑Breakdown (Cost Plan) */}
+        <span id="hardwareBreakdown" className="sr-only" aria-hidden="true" />
         {hwRows.length > 0 && (
           <SectionDelay delayMs={1600}>
             <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
               <CardHeader className="border-b-0 p-2.5">
                 <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
-                  {`${chapterIndex}.3 – ${hwTitle}`}
+                  {`${chapterIndex}.4 – ${hwTitle}`}
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-2.5 pt-1.5 md:pt-2.5 pb-5">
@@ -560,7 +539,7 @@ export default async function FinancePage() {
             <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
               <CardHeader className="border-b-0 p-2.5">
                 <CardTitle title={locale.startsWith('de') ? 'Indikativ, interne Planung' : 'Indicative, internal planning'} className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
-                  {`${chapterIndex}.2 – ${tBp('headings.revenueStreams') as string}`}
+                  {`${chapterIndex}.5 – ${tBp('headings.revenueStreams') as string}`}
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-2.5 pt-0 pb-5">
@@ -604,7 +583,7 @@ export default async function FinancePage() {
             <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
               <CardHeader className="border-b-0 p-2.5">
                 <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
-                  {`${chapterIndex}.3 – ${tBp('headings.useOfFunds') as string}`}
+                  {`${chapterIndex}.2 – ${tBp('headings.useOfFunds') as string}`}
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-2.5 pt-0 pb-5">
@@ -630,7 +609,7 @@ export default async function FinancePage() {
             <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
               <CardHeader className="border-b-0 p-2.5">
                 <CardTitle title={locale.startsWith('de') ? 'Indikativ, interne Planung' : 'Indicative, internal planning'} className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
-                  {`${chapterIndex}.4 – ${tBp('headings.revenueVsCost') as string}`}
+                  {`${chapterIndex}.6 – ${tBp('headings.revenueVsCost') as string}`}
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-2.5 pt-0 pb-5">
@@ -662,7 +641,7 @@ export default async function FinancePage() {
             <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
               <CardHeader className="border-b-0 p-2.5">
                 <CardTitle title={locale.startsWith('de') ? 'Indikativ, interne Planung' : 'Indicative, internal planning'} className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
-                  {`${chapterIndex}.5 – ${tBp('headings.cashFlow') as string}`}
+                  {`${chapterIndex}.7 – ${tBp('headings.cashFlow') as string}`}
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-2.5 pt-0 pb-5">
@@ -695,7 +674,7 @@ export default async function FinancePage() {
             <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
               <CardHeader className="border-b-0 p-2.5">
                 <CardTitle title={locale.startsWith('de') ? 'Indikativ, interne Planung' : 'Indicative, internal planning'} className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
-                  {`${chapterIndex}.6 – ${tBp('headings.profitBridge') as string}`}
+                  {`${chapterIndex}.8 – ${tBp('headings.profitBridge') as string}`}
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-2.5 pt-0">
@@ -719,7 +698,7 @@ export default async function FinancePage() {
             <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
               <CardHeader className="border-b-0 p-2.5">
                 <CardTitle title={locale.startsWith('de') ? 'Indikativ, interne Planung' : 'Indicative, internal planning'} className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
-                  {`${chapterIndex}.7 – ${ebitdaTitle || (tBp('headings.plOverview') as string)}`}
+                  {`${chapterIndex}.9 – ${ebitdaTitle || (tBp('headings.plOverview') as string)}`}
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-2.5 pt-0 pb-5">
@@ -745,7 +724,7 @@ export default async function FinancePage() {
             <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
               <CardHeader className="border-b-0 p-2.5">
                 <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
-                  {`${chapterIndex}.8 – ${locale.startsWith('de') ? 'Umsatzprognose' : 'Revenue Forecast'}`}
+                  {`${chapterIndex}.10 – ${locale.startsWith('de') ? 'Umsatzprognose' : 'Revenue Forecast'}`}
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-2.5 pt-0 pb-5">
@@ -769,7 +748,7 @@ export default async function FinancePage() {
             <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
               <CardHeader className="border-b-0 p-2.5">
                 <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
-                  {`${chapterIndex}.9 – ${locale.startsWith('de') ? 'Umsatztabelle' : 'Revenue Table'}`}
+                  {`${chapterIndex}.11 – ${locale.startsWith('de') ? 'Umsatztabelle' : 'Revenue Table'}`}
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-2.5 pt-0 pb-5">
@@ -795,7 +774,7 @@ export default async function FinancePage() {
             <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
               <CardHeader className="border-b-0 p-2.5">
                 <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
-                  {`${chapterIndex}.10 – ${tBp('headings.fundraising') as string}`}
+                  {`${chapterIndex}.12 – ${tBp('headings.fundraising') as string}`}
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-2.5 pt-0 pb-5">
@@ -819,7 +798,7 @@ export default async function FinancePage() {
             <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
               <CardHeader className="border-b-0 p-2.5">
                 <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
-                  {`${chapterIndex}.11 – ${tBp('sections.capTable') as string}`}
+                  {`${chapterIndex}.13 – ${tBp('sections.capTable') as string}`}
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-2.5 pt-0 pb-5">
@@ -843,7 +822,7 @@ export default async function FinancePage() {
             <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
               <CardHeader className="border-b-0 p-2.5">
                 <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
-                  {`${chapterIndex}.12 – ${tBp('headings.projections') as string}`}
+                  {`${chapterIndex}.14 – ${tBp('headings.projections') as string}`}
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-2.5 pt-1.5 md:pt-2.5 pb-5">
@@ -867,7 +846,7 @@ export default async function FinancePage() {
             <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
               <CardHeader className="border-b-0 p-2.5">
                 <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
-                  {`${chapterIndex}.13 – ${tBp('headings.submissionsPlan') as string}`}
+                  {`${chapterIndex}.15 – ${tBp('headings.submissionsPlan') as string}`}
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-2.5 pt-0 pb-5">
@@ -912,7 +891,7 @@ export default async function FinancePage() {
             <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
               <CardHeader className="border-b-0 p-2.5">
                 <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
-                  {`${chapterIndex}.14 – ${locale.startsWith('de') ? 'Finanzierungsübersicht (indikativ)' : 'Funding summary (indicative)'}`}
+                  {`${chapterIndex}.16 – ${locale.startsWith('de') ? 'Finanzierungsübersicht (indikativ)' : 'Funding summary (indicative)'}`}
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-2.5 pt-0 pb-5">
@@ -945,12 +924,13 @@ export default async function FinancePage() {
         )}
 
         {/* Annahmen (Liste) – optional */}
+        <span id="assumptions" className="sr-only" aria-hidden="true" />
         {Array.isArray(finAssumptions) && finAssumptions.length > 0 && (
           <SectionDelay delayMs={5600}>
             <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
               <CardHeader className="border-b-0 p-2.5">
                 <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
-                  {`${chapterIndex}.15 – ${locale.startsWith('de') ? 'Annahmen' : 'Assumptions'}`}
+                  {`${chapterIndex}.17 – ${locale.startsWith('de') ? 'Annahmen' : 'Assumptions'}`}
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-2.5 pt-0 pb-3">
@@ -965,12 +945,13 @@ export default async function FinancePage() {
         )}
 
         {/* Annahmen (Tabelle) – optional */}
+        <span id="assumptionsTable" className="sr-only" aria-hidden="true" />
         {Array.isArray(finAssumptionsTable?.headers) && finAssumptionsTable.headers!.length > 0 && Array.isArray(finAssumptionsTable?.rows) && finAssumptionsTable.rows!.length > 0 && (
           <SectionDelay delayMs={6000}>
             <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
               <CardHeader className="border-b-0 p-2.5">
                 <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
-                  {`${chapterIndex}.16 – ${locale.startsWith('de') ? 'Annahmen (Tabelle)' : 'Assumptions (Table)'}`}
+                  {`${chapterIndex}.18 – ${locale.startsWith('de') ? 'Annahmen (Tabelle)' : 'Assumptions (Table)'}`}
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-2.5 pt-0 pb-5">
