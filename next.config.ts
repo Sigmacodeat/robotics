@@ -7,7 +7,8 @@ const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 const nextConfig: NextConfig = {
   // Ensure Turbopack selects this project as root (multiple lockfiles detected)
   turbopack: {
-    root: __dirname
+    // Use process.cwd() instead of __dirname to be ESM-safe on Vercel/Edge
+    root: process.cwd()
   },
   // Hinweis: Manifest wird über die Route src/app/manifest.ts ausgeliefert
   // Ein eigener Header-Eintrag für /site.webmanifest ist nicht nötig,
