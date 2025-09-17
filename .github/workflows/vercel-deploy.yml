@@ -2,7 +2,7 @@ name: Vercel Deploy
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, root-clean ]
   workflow_dispatch:
 
 permissions:
@@ -66,7 +66,7 @@ jobs:
       - name: Link project (no prompt)
         run: |
           npx vercel link --yes \
-            --cwd=robotics \
+            --cwd=. \
             ${EXTRA_PROJECT} \
             ${EXTRA_SCOPE} \
             --token=$VERCEL_TOKEN
@@ -75,24 +75,24 @@ jobs:
         run: |
           npx vercel pull --yes \
             --environment=production \
-            --cwd=robotics \
+            --cwd=. \
             --token=$VERCEL_TOKEN \
             ${EXTRA_PROJECT} \
             ${EXTRA_SCOPE}
 
       - name: Install dependencies
-        working-directory: robotics
+        working-directory: .
         run: pnpm install --frozen-lockfile
 
       - name: Build
-        working-directory: robotics
+        working-directory: .
         run: pnpm build
 
       - name: Deploy to Vercel (prebuilt)
         run: |
           npx vercel deploy --prebuilt \
             --prod \
-            --cwd=robotics \
+            --cwd=. \
             --token=$VERCEL_TOKEN \
             ${EXTRA_PROJECT} \
             ${EXTRA_SCOPE}
