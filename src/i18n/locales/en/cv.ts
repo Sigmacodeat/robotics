@@ -41,10 +41,10 @@ const data = {
         "Successful turnaround and securing 150 jobs",
         "New foundation of Cutting Edge d.o.o. with €1.2 million startup capital",
         "Company value growth to over €10 million through new orders and investors",
-        "Acquisition of new shareholders: Recaro Automotive, Gruppo Mastrotto (15% stake for €1.5 million)"
+        "Acquisition of new shareholders: Recaro Automotive (DE) 🇩🇪 (20%), Gruppo Mastrotto (IT) 🇮🇹 (15%; €1.5 million)"
       ],
-      "period": "2020 – Present",
-      "subtitle": "Z-Line Automotive (Slovenia) → Cutting Edge d.o.o.",
+      "period": "05/2022 – 02/2024",
+      "subtitle": "Z-Line Automotive (Slovenia) 🇸🇮 → Cutting Edge d.o.o.",
       "title": "Turnaround Expert & CEO"
     },
     {
@@ -55,7 +55,7 @@ const data = {
         "Handed over company to focus on Robotics & AI"
       ],
       "period": "2020 – 2022",
-      "subtitle": "Servacon GmbH",
+      "subtitle": "Servacon GmbH (AT/DE) 🇦🇹🇩🇪 & Servacon s.r.o. (SK) 🇸🇰",
       "title": "CEO & Owner"
     },
     {
@@ -65,7 +65,7 @@ const data = {
         "Coordination with authorities (B&B and B&C)"
       ],
       "period": "01/2022 – 06/2023",
-      "subtitle": "PCR-Labor Kuhn & Mather OG",
+      "subtitle": "PCR-Labor Kuhn & Mather OG (AT) 🇦🇹",
       "title": "Head & Co-Founder"
     },
     {
@@ -75,19 +75,18 @@ const data = {
         "Development of Covid-19 testing strategies during the pandemic"
       ],
       "period": "2018 – 2021",
-      "subtitle": "MediStore.at",
+      "subtitle": "MediStore.at (AT) 🇦🇹",
       "title": "Strategic Advisor & IT Architect"
     },
     {
       "bullets": [
-        "Building a sustainable GPU-based mini-platform",
-        "Early infrastructure for modern AI applications",
-        "Team size: 5 employees",
-        "GPU volume: ~€2M"
+        "Summary: Crypto advisory, trading, GPU mining (Luleå/SE) & mining farm (Priboj/RS)",
+        "Consortium with partners: jointly developed/deployed mining hardware & infrastructure (SE/RS)",
+        "Roles: Founder/CEO, shareholder, operator; total investment > €2.6M"
       ],
-      "period": "2016 – 2018",
-      "subtitle": "GPU Platform Luleå (Sweden)",
-      "title": "Founder & Operator"
+      "period": "2016 – 2020",
+      "subtitle": "Overview",
+      "title": "Crypto & Mining"
     },
     {
       "bullets": [
@@ -107,7 +106,7 @@ const data = {
         "Growth: scaled ~2.25x per location; after opening a second store total ~4x output (no monetary figures)"
       ],
       "period": "2010 – 2022",
-      "subtitle": "Mac Plus Multimedia",
+      "subtitle": "McPlus Multimedia (AT) 🇦🇹",
       "title": "Founder & CEO"
     },
     {
@@ -117,7 +116,7 @@ const data = {
         "Team size: 1 (self-employed)"
       ],
       "period": "2008 – 2010",
-      "subtitle": "Computernotruf.at",
+      "subtitle": "Computernotruf.at (AT) 🇦🇹",
       "title": "Founder & CEO"
     },
     {
@@ -144,9 +143,21 @@ const data = {
         "Leadership and strategic development of associations promoting research & innovation",
         "Building international networks between science, technology and industry"
       ],
-      "period": "2021 – Present",
-      "subtitle": "Research & Innovation Associations (incl. RCIID, Metanetwork)",
+      "period": "2018 – Present",
+      "subtitle": "RCIID (Rocket Chain Institute for International Development)",
       "title": "President"
+    },
+    {
+      "bullets": [
+        "Blockchain & AI research and development (Metanetwork)",
+        "Pre-research underpinning this business plan",
+        "Jointly developed mining hardware (with partners)",
+        "Exclusive partnerships in China (CN) 🇨🇳: Pandaminer & Pangolinminer (mining hardware)",
+        "Strategy: repurpose GPU hardware for AI after mining (lifetime value, preparing for the AI boom)"
+      ],
+      "period": "2017 – Present",
+      "subtitle": "Metanetwork – Blockchain & AI Research & Development",
+      "title": "Head of Research & Development"
     },
     {
       "bullets": [
@@ -159,11 +170,14 @@ const data = {
     },
     {
       "bullets": [
-        "Co-organization and strategic support of an Austria-wide MMA event",
+        "Co-organization and strategic support of a nation-wide MMA event (largest MMA event in Austria, Wiener Stadthalle)",
+        "Research & investigations related to the event series",
+        "Sparta Reality Show (YouTube): https://www.youtube.com/watch?v=xtxf_VKw1mg",
+        "Key accounts: enterprise clients, sponsors, VIP & influencer relations",
         "Mentoring of athletes & business partners"
       ],
       "period": "2020 – Present",
-      "subtitle": "Sparta CF (MMA Austria)",
+      "subtitle": "Sparta CF (AT) – MMA Austria 🇦🇹",
       "title": "Organizer & Strategic Partner/Mentor"
     },
     {
@@ -226,12 +240,12 @@ const data = {
         "company": "Cutting Edge d.o.o.",
         "description": "Turnaround and restructuring from 1.2M€ to over 10M€ company value",
         "employees": 150,
-        "growth": 875,
-        "period": "2020 – Present",
+        "growth": 775,
+        "period": "05/2022 – 02/2024",
         "value": 10.5
       },
       {
-        "company": "PCR-Labor Kuhn & Mather OG",
+        "company": "PCR-Labor Kuhn & Mather OG (AT) 🇦🇹",
         "description": "PCR lab build & operations; start capital €0.25M, result: ~€2.2M profit (ROI: +880%)",
         "growth": 880,
         "period": "01/2022 – 06/2023",
@@ -239,7 +253,7 @@ const data = {
         "startCapital": 0.25
       },
       {
-        "company": "Servacon GmbH",
+        "company": "Servacon GmbH & s.r.o. (AT/DE/SK) 🇦🇹🇩🇪🇸🇰",
         "description": "Building and scaling in medical technology with government recognition",
         "employees": 25,
         "growth": 280,
@@ -261,6 +275,65 @@ const data = {
         "growth": 120,
         "period": "2015 – 2018",
         "value": 0.8
+      },
+      {
+        "company": "Sparta CF (MMA Austria) 🇦🇹",
+        "description": "Professionalized event series, expanded sponsorship & ticketing",
+        "employees": 10,
+        "growth": 95,
+        "period": "2021 – Present",
+        "value": 0.35
+      },
+      {
+        "company": "Miss Germany Organization",
+        "description": "Business & media partnerships, scaled reach and collaborations",
+        "employees": 20,
+        "growth": 60,
+        "period": "2019 – 2021",
+        "value": 1.2
+      },
+      {
+        "company": "Global Forensic Alliance",
+        "description": "Built an international forensics community and services",
+        "employees": 9,
+        "growth": 85,
+        "period": "2017 – 2019",
+        "value": 0.9
+      },
+      {
+        "company": "McPlus Multimedia (AT) 🇦🇹",
+        "description": "Retail scaling: ~2.25x per store; with second store total ~4x (no monetary figures)",
+        "growth": 300,
+        "period": "2010 – 2022",
+        "series": [1, 2.25, 4.0]
+      },
+      {
+        "company": "mscinvest d.o.o.",
+        "description": "Crypto consulting; generated profit ~€0.8M (no speculative gains)",
+        "growth": 100,
+        "period": "2017 – 2020",
+        "value": 0.8
+      },
+      {
+        "company": "coin2cash s.r.o.",
+        "description": "Shareholder; international OTC crypto trading",
+        "growth": 100,
+        "period": "2017 – 2019",
+        "value": 0.5
+      },
+      {
+        "company": "bitunity GmbH – Luleå (SE) 🇸🇪",
+        "description": "GPU mining farm; investment volume ~€2.0M",
+        "growth": 100,
+        "period": "2016 – 2018",
+        "value": 2.0
+      },
+      {
+        "company": "Mining Farm Priboj (RS) 🇷🇸",
+        "description": "Mining farm operations; investment volume ~€0.6M",
+        "growth": 100,
+        "period": "2018 – 2019",
+        "value": 0.6
       }
     ],
     "title": "Performance Track Record"
@@ -269,6 +342,9 @@ const data = {
   "photo": "/cv/profile.jpg",
   "print": "Print",
   "printDescription": "Prints the current page and saves it as PDF",
+  "press": {
+    "title": "Press & Media"
+  },
   "role": "Executive Entrepreneur & Innovation Architect",
   "saveAsPdf": "Save as PDF",
   "skills": {

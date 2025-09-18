@@ -9,7 +9,7 @@ import BreakEvenChartAnimated, { type BEPoint } from "@charts/BreakEvenChartAnim
 import MultiLineChartAnimated, { type SeriesPoint } from "@charts/MultiLineChartAnimated";
 import WaterfallChartAnimated, { type WaterfallStep } from "@charts/WaterfallChartAnimated";
 import StackedBarAnimated, { type StackedSeries } from "@charts/StackedBarAnimated";
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import { seriesColors } from "@/components/charts/theme";
 
 export type TableRow = (string | number)[];
@@ -146,7 +146,6 @@ export default function FinanceChapter({
 }) {
   const t = useTranslations();
   const tBp = useTranslations('bp');
-  const locale = useLocale();
   // --- helpers for light formatting ---
   const euroShort = (n: number) => {
     const sign = n < 0 ? "-" : "";

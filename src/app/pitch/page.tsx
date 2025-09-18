@@ -8,7 +8,7 @@ import { defaultTransition, defaultViewport } from "@/components/animation/varia
 import { getMessages } from "@/i18n/messages";
 import { buildLocalePath } from "@/i18n/path";
 import Link from "next/link";
-import { Card } from "@/components/ui/card";
+import ElegantCard from "@/components/ui/ElegantCard";
 import { useLocale, useTranslations } from "next-intl";
 import { Bot, CheckCircle2, Sparkles, LineChart, Rocket, Cpu, Users, AlertTriangle, Target, Banknote, Leaf, Flag, Briefcase, Mail, Printer, ChevronsDown, Mouse } from "lucide-react";
 import PitchCoverPage from "@/components/document/PitchCoverPage";
@@ -184,7 +184,7 @@ function IntroOverlay({ onDone }: { onDone?: () => void }) {
             />
           ))}
           {/* Partikel entfernt */}
-        </div>
+          </div>
       ) : null}
 
       {/* Skip Control */}
@@ -678,7 +678,7 @@ export default function PitchPage() {
       <div className="py-8">
         {/* Hero Header – eleganter Titel mit Badge & i18n Subtitel */}
         <div className="mb-12 md:mb-16">
-          <div className="mx-auto max-w-3xl text-center">
+          <div className="mx-auto max-w-3xl text-center flex flex-col items-center justify-center">
             {/* Badge (bleibt sichtbar ab 'badge' und in 'meta') */}
             <AnimatePresence>
               {(stage === 'badge' || stage === 'meta') && (
@@ -711,21 +711,17 @@ export default function PitchPage() {
               )}
             </AnimatePresence>
 
-            {/* Brand Lockup */}
-            <h1 className="mt-1.5 text-[clamp(3.0rem,10.5vw,3.6rem)] md:text-5xl font-extrabold tracking-tight md:tracking-tighter leading-[1.06] md:leading-tight">
-              <Link
-                href={buildLocalePath('/', locale)}
-                className="no-underline hover:no-underline focus:no-underline decoration-transparent"
-              >
-                <span className="flex flex-col items-center gap-1 sm:flex-row sm:gap-2 [--g1:var(--color-accent)] [--g2:var(--color-accent-3)]">
+            {/* Brand Lockup (kein Link, zentriert, ohne Unterstreichung) */}
+            <h1 className="mt-1.5 text-[clamp(3.0rem,10.5vw,3.6rem)] md:text-5xl font-extrabold tracking-tight md:tracking-tighter leading-[1.06] md:leading-tight w-full">
+              <span className="flex flex-col items-center justify-center gap-1 sm:flex-row sm:items-center sm:justify-center sm:gap-2 [--g1:var(--color-accent)] [--g2:var(--color-accent-3)] pointer-events-none select-none w-full">
                   {/* Header-Anchor für die Zielmessung */}
                   <span id="pitch-bot-anchor" className="inline-flex items-center justify-center w-[1.5em] h-[1.5em] sm:w-[1.15em] sm:h-[1.15em]">
                     <motion.i
                       aria-hidden
                       className={`inline-flex items-center justify-center text-[--color-accent] w-[1.5em] h-[1.5em] sm:w-[1.15em] sm:h-[1.15em] ${showIntro ? 'invisible' : 'visible'}`}
                       style={{ width: '1.15em', height: '1.15em' }}
-                      animate={{ x: headerReady ? -10 : 0 }}
-                      transition={{ type: 'spring', stiffness: 240, damping: 22 }}
+                      animate={headerReady && !showIntro ? { scale: [1, 1.03, 1] } : {}}
+                      transition={{ duration: 0.6, ease: 'easeInOut' }}
                     >
                       <Bot className="w-full h-full" stroke="currentColor" fill="none" strokeWidth={2} />
                     </motion.i>
@@ -750,8 +746,7 @@ export default function PitchPage() {
                   >
                     Robotics
                   </motion.span>
-                </span>
-              </Link>
+              </span>
             </h1>
 
             {/* Subtitel + Divider erscheinen erst nach Badge */}
@@ -766,12 +761,7 @@ export default function PitchPage() {
                   >
                     {t("subtitle", { default: "Humanoid Robotics · App‑Store · KI‑Assistenz · Skalierbares RaaS" })}
                   </motion.p>
-                  <motion.div
-                    className="mt-3 h-[2px] w-32 md:w-36 mx-auto rounded-full [--g1:var(--color-accent)] [--g2:var(--color-accent-3)] bg-[linear-gradient(90deg,var(--g1),var(--g2))] opacity-90"
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.35, ease: 'easeOut', delay: 0.24 }}
-                  />
+                  {/* Unterstreichung/Divider im Logo-Hero entfernt */}
                   {!prefersReducedPage && (
                     <motion.div
                       className="mt-3 flex items-center justify-center"
@@ -879,11 +869,12 @@ export default function PitchPage() {
         </nav>
 
         {/* Investment Case – Moat, Traction, Unit Economics, GTM */}
-        <Reveal className="rounded-2xl card-outline-gradient shadow-sm p-8 mt-14 print:shadow-none print:ring-0 print:bg-transparent">
-          <div className="mb-4">
-            <h2 className="text-xl font-extrabold tracking-tight">Investment Case</h2>
-          </div>
-          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+        <Reveal>
+          <ElegantCard className="mt-14" innerClassName="p-8 print:shadow-none print:ring-0 print:bg-transparent">
+            <div className="mb-4">
+              <h2 className="text-xl font-extrabold tracking-tight">Investment Case</h2>
+            </div>
+            <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
             {useMemo(() => {
               const m: any = messages ?? {};
               const moats: string[] = Array.isArray(m.marketCompetitive?.moat) ? m.marketCompetitive.moat : (Array.isArray(m.content?.marketCompetitive?.moat) ? m.content.marketCompetitive.moat : overrides.investmentCase.moat);
@@ -920,16 +911,18 @@ export default function PitchPage() {
                 </ul>
               </motion.div>
             ))}
-          </div>
+            </div>
+          </ElegantCard>
         </Reveal>
 
         {/* Use of Funds – Ticket, Allocation, Nächste Meilensteine */}
-        <Reveal className="rounded-2xl card-outline-gradient shadow-sm p-8 mt-12 print:shadow-none print:ring-0 print:bg-transparent">
-          <div className="mb-4">
-            <h2 className="text-xl font-extrabold tracking-tight">Use of Funds</h2>
-          </div>
-          
-          {useMemo(() => {
+        <Reveal>
+          <ElegantCard className="mt-12" innerClassName="p-8 print:shadow-none print:ring-0 print:bg-transparent">
+            <div className="mb-4">
+              <h2 className="text-xl font-extrabold tracking-tight">Use of Funds</h2>
+            </div>
+            
+            {useMemo(() => {
             const m: any = messages ?? {};
             const fin = (m.content?.finance ?? m.finance ?? {}) as any;
             const ticket = fin.fundingStrategy?.ticket ?? fin.fundingRound?.ticket ?? overrides.useOfFunds.ticket;
@@ -942,7 +935,7 @@ export default function PitchPage() {
             const milestones = (msRows || []).slice(0, 3).map((r: any[]) => ({ year: r?.[0], quarter: r?.[1], title: r?.[2] }));
             return { ticket, allocation, milestones };
           }, [messages, overrides]) as any /* narrow scope */ && (
-            <div className="grid gap-6 md:grid-cols-3">
+              <div className="grid gap-6 md:grid-cols-3">
               {/* Ticketgröße */}
               <div className="rounded-2xl bg-[--color-surface]/70 ring-1 ring-[--color-border-subtle] p-5 print:shadow-none print:ring-0 print:bg-transparent">
                 <div className="text-sm font-semibold tracking-wide uppercase mb-1">Ticketgröße</div>
@@ -1039,17 +1032,19 @@ export default function PitchPage() {
                   })()}
                 </ul>
               </div>
-            </div>
-          )}
+              </div>
+            )}
+          </ElegantCard>
         </Reveal>
 
         {/* Ask & Terms – Runde, Rahmenbedingungen, Runway */}
-        <Reveal className="rounded-2xl card-outline-gradient shadow-sm p-8 mt-12 print:shadow-none print:ring-0 print:bg-transparent">
-          <div className="mb-4">
-            <h2 className="text-xl font-extrabold tracking-tight">Ask & Terms</h2>
-          </div>
-          
-          <div className="grid gap-6 md:grid-cols-3">
+        <Reveal>
+          <ElegantCard className="mt-12" innerClassName="p-8 print:shadow-none print:ring-0 print:bg-transparent">
+            <div className="mb-4">
+              <h2 className="text-xl font-extrabold tracking-tight">Ask & Terms</h2>
+            </div>
+            
+            <div className="grid gap-6 md:grid-cols-3">
             {/* Runde & Zweck */}
             <div>
               <div className="text-sm font-semibold tracking-wide uppercase mb-2">Runde & Zweck</div>
@@ -1110,26 +1105,30 @@ export default function PitchPage() {
               </ul>
             </div>
           </div>
+          </ElegantCard>
         </Reveal>
 
         {/* Compact Risks & Mitigation */}
-        <Reveal className="rounded-2xl card-outline-gradient shadow-sm p-8 mt-12 print:shadow-none print:ring-0 print:bg-transparent">
-          <div className="mb-2">
-            <h2 className="text-lg font-semibold tracking-tight">Risiken & Mitigation (Auszug)</h2>
-          </div>
-          <ul className="grid gap-2.5 md:gap-3 md:grid-cols-2 text-[13px] md:text-[14px] list-none p-0 m-0">
+        <Reveal>
+          <ElegantCard className="mt-12" innerClassName="p-8 print:shadow-none print:ring-0 print:bg-transparent">
+            <div className="mb-2">
+              <h2 className="text-lg font-semibold tracking-tight">Risiken & Mitigation (Auszug)</h2>
+            </div>
+            <ul className="grid gap-2.5 md:gap-3 md:grid-cols-2 text-[13px] md:text-[14px] list-none p-0 m-0">
             {useMemo(() => extractBulletsForChapter('risks', messages), [messages]).filter((r) => !shouldHideBullet(r)).slice(0,6).map((r, i) => (
               <li key={i} className="flex items-start gap-2">
                 <span className="mt-1 h-1 w-1 rounded-full bg-white/80" aria-hidden />
                 <span>{r}</span>
               </li>
             ))}
-          </ul>
+            </ul>
+          </ElegantCard>
         </Reveal>
 
         {/* Call to Action */}
-        <Reveal className="rounded-2xl shadow-sm p-8 mt-16 bg-[--color-surface]/70 print:shadow-none print:ring-0 print:bg-transparent">
-          <motion.div
+        <Reveal>
+          <ElegantCard className="mt-16" innerClassName="p-8 print:shadow-none print:ring-0 print:bg-transparent">
+            <motion.div
             className="text-center space-y-6"
             initial={{ opacity: 0, y: 50 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -1163,7 +1162,8 @@ export default function PitchPage() {
                 PDF exportieren
               </motion.button>
             </div>
-          </motion.div>
+            </motion.div>
+          </ElegantCard>
         </Reveal>
       </div>
       {/* Print-only closing/contact page */}
@@ -1278,8 +1278,9 @@ function ChapterSection({ chapter, index, total, messages, locale }: {
   }, [chapter.slug]);
 
   return (
-    <Reveal className="rounded-2xl card-outline-gradient shadow-sm p-8 print:shadow-none print:ring-0 print:bg-transparent">
-      <div className="flex items-center justify-between mb-6">
+    <Reveal>
+      <ElegantCard innerClassName="p-8 print:shadow-none print:ring-0 print:bg-transparent">
+        <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3 sm:gap-4">
           <motion.span
             className="shine-text text-3xl sm:text-4xl font-extrabold"
@@ -1396,15 +1397,18 @@ function ChapterSection({ chapter, index, total, messages, locale }: {
               whileHover={{ y: -2, scale: 1.01 }}
               whileTap={{ scale: 0.99 }}
            >
-              <Card className="kpi-card kpi-card--spacious kpi-card--hairline rounded-2xl bg-[--color-surface]/70">
-                <div className="kpi-card-content p-4 md:p-5 text-center">
-                  <div className="kpi-card-header text-[10px] md:text-[11px] tracking-wide uppercase text-[--color-foreground] opacity-80">{k.label}</div>
-                  <div className="kpi-value-row font-semibold [font-feature-settings:'tnum'] [font-variant-numeric:tabular-nums]">
-                    <span className="kpi-value">{k.value}</span>
-                  </div>
-                  {k.sub ? (<div className="kpi-sub">{k.sub}</div>) : null}
+              <ElegantCard
+                className="kpi-card kpi-card--spacious kpi-card--hairline rounded-2xl"
+                innerClassName="kpi-card-content p-4 md:p-5 text-center bg-[--color-surface]/70"
+                ariaLabel={`${k.label} KPI Card`}
+                role="group"
+              >
+                <div className="kpi-card-header text-[10px] md:text-[11px] tracking-wide uppercase text-[--color-foreground] opacity-80">{k.label}</div>
+                <div className="kpi-value-row font-semibold [font-feature-settings:'tnum'] [font-variant-numeric:tabular-nums]">
+                  <span className="kpi-value">{k.value}</span>
                 </div>
-              </Card>
+                {k.sub ? (<div className="kpi-sub">{k.sub}</div>) : null}
+              </ElegantCard>
             </motion.div>
           ))}
         </div>
@@ -1426,6 +1430,7 @@ function ChapterSection({ chapter, index, total, messages, locale }: {
           </motion.span>
         </Link>
       </motion.div>
+      </ElegantCard>
     </Reveal>
   );
 }

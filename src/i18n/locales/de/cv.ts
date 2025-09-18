@@ -41,10 +41,10 @@ const data = {
         "Sanierung und Sicherung von 150 Arbeitsplätzen",
         "Mit 1,2 Mio. € Startkapital Neugründung von Cutting Edge d.o.o.",
         "Firmenwertaufbau auf 10,5 Mio. € durch neue Auftragslage und Investoren",
-        "Gewinnung neuer Gesellschafter: Recaro Automotive (20 %), Gruppo Mastrotto (15 %; 1,5 Mio. €)"
+        "Gewinnung neuer Gesellschafter: Recaro Automotive (DE) 🇩🇪 (20 %), Gruppo Mastrotto (IT) 🇮🇹 (15 %; 1,5 Mio. €)"
       ],
       "period": "05/2022 – 02/2024",
-      "subtitle": "Z-Line Automotive (Slowenien) → Cutting Edge d.o.o.",
+      "subtitle": "Z-Line Automotive (Slowenien) 🇸🇮 → Cutting Edge d.o.o.",
       "title": "Sanierer & Geschäftsführer"
     },
     {
@@ -55,7 +55,7 @@ const data = {
         "Übergabe des Unternehmens, um Fokus auf Robotics & AI zu legen"
       ],
       "period": "05/2020 – 02/2022",
-      "subtitle": "Servacon GmbH",
+      "subtitle": "Servacon GmbH (AT/DE) 🇦🇹🇩🇪 & Servacon s.r.o. (SK) 🇸🇰",
       "title": "Geschäftsführer & Gesellschafter"
     },
     {
@@ -65,7 +65,7 @@ const data = {
         "Koordination mit Behörden (B&B und B&C)"
       ],
       "period": "01/2022 – 06/2023",
-      "subtitle": "PCR-Labor Kuhn & Mather OG",
+      "subtitle": "PCR-Labor Kuhn & Mather OG (AT) 🇦🇹",
       "title": "Leiter & Mitgründer"
     },
     {
@@ -76,68 +76,18 @@ const data = {
         "Sanierungsunterstützung als externer Experte (Vor‑Insolvenzphase, Stabilisierung & Maßnahmenplan)"
       ],
       "period": "08/2022 – 05/2023",
-      "subtitle": "MediStore.at",
+      "subtitle": "MediStore.at (AT) 🇦🇹",
       "title": "Strategischer Berater & IT‑Audit"
     },
     {
       "bullets": [
         "Zusammenfassung: Kryptoberatung, Handel, GPU‑Mining (Luleå/SE) & Miningfarm (Priboj/RS)",
+        "Konsortium mit Partnern: gemeinsam entwickelte/eingesetzte Mining‑Hardware & Infrastruktur (SE/RS)",
         "Rollen: Gründer/Geschäftsführer, Gesellschafter, Betreiber; Investitionsvolumen > 2,6 Mio. €"
       ],
       "period": "2016 – 2020",
       "subtitle": "Übersicht",
       "title": "Krypto & Mining"
-    },
-    {
-      "bullets": [
-        "Kryptoberatungsfirma; Aufbau von Beratungs- und Compliance-Services (keine Spekulationen)",
-        "Erzielter Gewinn: ca. 800.000 € (2017–2019)",
-        "Kundenfokus: KMU, High-Net-Worth & Early Adopters"
-      ],
-      "period": "2017 – 2020",
-      "subtitle": "mscinvest d.o.o.",
-      "title": "Gründer & Geschäftsführer"
-    },
-    {
-      "bullets": [
-        "Gesellschafter & Mitbetreiber",
-        "Internationaler Kryptowährungshandel (OTC, EU/CZ/CEE)",
-        "Operationales Risikomanagement & Banken-/Exchange-Schnittstellen"
-      ],
-      "period": "2017 – 2019",
-      "subtitle": "coin2cash s.r.o.",
-      "title": "Gesellschafter"
-    },
-    {
-      "bullets": [
-        "Betrieb einer GPU-Miningfarm in Luleå (SE)",
-        "Grafikkartenvolumen: ~2 Mio. € Investment",
-        "Infrastruktur & Energie-Optimierung für 24/7‑Betrieb"
-      ],
-      "period": "2016 – 2018",
-      "subtitle": "bitunity GmbH – GPU‑Miningfarm Luleå (Schweden)",
-      "title": "Gesellschafter & Mentor"
-    },
-    {
-      "bullets": [
-        "Aufbau einer Miningfarm in Priboj (Serbien)",
-        "Investitionsvolumen: ~600.000 €",
-        "Betrieb & Wartung, Sicherheits- und Kühlkonzept"
-      ],
-      "period": "2018 – 2019",
-      "subtitle": "Miningfarm – Priboj (Serbien)",
-      "title": "Betreiber"
-    },
-    {
-      "bullets": [
-        "Aufbau einer nachhaltigen GPU-basierten Mini-Plattform",
-        "Frühe Infrastruktur zur Vorbereitung moderner KI-Anwendungen",
-        "Mitarbeiterzahl: 5",
-        "GPU‑Volumen: ~2 Mio. €"
-      ],
-      "period": "2016 – 2018",
-      "subtitle": "GPU-Plattform Luleå (Schweden)",
-      "title": "Gründer & Betreiber"
     },
     {
       "bullets": [
@@ -157,7 +107,7 @@ const data = {
         "Wachstum: Skalierung von ~2.25x pro Standort; nach Eröffnung der zweiten Filiale gesamt ~4x Umsatzleistung (ohne Geldbeträge)"
       ],
       "period": "2010 – 2022",
-      "subtitle": "Mac Plus Multimedia",
+      "subtitle": "McPlus Multimedia (AT) 🇦🇹",
       "title": "Gründer & Geschäftsführer"
     },
     {
@@ -167,7 +117,7 @@ const data = {
         "Mitarbeiterzahl: 1 (Selbstständig)"
       ],
       "period": "2008 – 2010",
-      "subtitle": "Computernotruf.at",
+      "subtitle": "Computernotruf.at (AT) 🇦🇹",
       "title": "Gründer & Geschäftsführer"
     },
     {
@@ -194,9 +144,21 @@ const data = {
         "Leitung und strategische Weiterentwicklung von Vereinen zur Förderung von Forschung & Innovation",
         "Aufbau internationaler Netzwerke zwischen Wissenschaft, Technologie und Industrie"
       ],
-      "period": "2021 – heute",
-      "subtitle": "Forschungs- & Innovationsvereine (u. a. RCIID, Metanetwork)",
+      "period": "2018 – heute",
+      "subtitle": "RCIID (Rocket Chain Institute for International Development)",
       "title": "Präsident"
+    },
+    {
+      "bullets": [
+        "Blockchain & AI Forschung und Entwicklung (Metanetwork)",
+        "Vorforschung als Basis für diesen Businessplan",
+        "Gemeinsam entwickelte Mining‑Hardware (mit Partnern)",
+        "Exklusive Partnerschaften in China (CN) 🇨🇳: Pandaminer & Pangolinminer (Mining‑Hardware)",
+        "Strategie: GPU‑Hardware nach dem Mining für KI weiterverwenden (Lifetime Value, Vorbereitung auf den KI‑Boom)"
+      ],
+      "period": "2017 – heute",
+      "subtitle": "Metanetwork – Blockchain & AI Forschung & Entwicklung",
+      "title": "Leiter Forschung & Entwicklung"
     },
     {
       "bullets": [
@@ -210,10 +172,14 @@ const data = {
     {
       "bullets": [
         "Mitorganisation und strategische Begleitung einer österreichweiten MMA-Veranstaltung",
+        "Größtes MMA-Event Österreichs (Stadthalle)",
+        "Recherche & Investigations",
+        "Sparta Reality Show (YouTube): https://www.youtube.com/watch?v=xtxf_VKw1mg",
+        "Betreuung von Großkunden, Sponsoren, VIP & Influencern",
         "Mentoring von Athleten & Business-Partnern"
       ],
       "period": "2020 – heute",
-      "subtitle": "Sparta CF (MMA Österreich)",
+      "subtitle": "Sparta CF (AT) – MMA Österreich 🇦🇹",
       "title": "Veranstalter & Strategischer Partner/Mentor"
     },
     {
@@ -289,7 +255,7 @@ const data = {
         "startCapital": 0.25
       },
       {
-        "company": "Servacon GmbH",
+        "company": "Servacon GmbH & s.r.o. (AT/DE/SK) 🇦🇹🇩🇪🇸🇰",
         "description": "Aufbau und Skalierung im Medizintechnik-Bereich (DACH + Skandinavien); Startkapital 0,6 Mio. €, Ergebnis: 2,8 Mio. € Gewinn",
         "employees": 25,
         "growth": 280,
@@ -339,7 +305,7 @@ const data = {
       }
       ,
       {
-        "company": "Mac Plus Multimedia",
+        "company": "McPlus Multimedia (AT)",
         "description": "Retail-Skalierung: von Basiswert auf ~2.25x pro Filiale; mit zweiter Filiale gesamt ~4x Wachstum (ohne Geldbeträge)",
         "growth": 300,
         "period": "2010 – 2022",
@@ -361,14 +327,14 @@ const data = {
       },
       {
         "company": "bitunity GmbH – Luleå (SE)",
-        "description": "GPU‑Miningfarm; Investitionsvolumen ~2,0 Mio. €",
+        "description": "GPU‑Miningfarm (Konsortium mit Partnern; gemeinsam entwickelte/ eingesetzte Mining‑Hardware & Infrastruktur); Investitionsvolumen ~2,0 Mio. €",
         "growth": 100,
         "period": "2016 – 2018",
         "value": 2.0
       },
       {
         "company": "Miningfarm Priboj (Serbien)",
-        "description": "Miningfarm‑Betrieb; Investitionsvolumen ~0,6 Mio. €",
+        "description": "Miningfarm‑Betrieb (Konsortium mit Partnern; gemeinsam entwickelte/ eingesetzte Mining‑Hardware & Infrastruktur); Investitionsvolumen ~0,6 Mio. €",
         "growth": 100,
         "period": "2018 – 2019",
         "value": 0.6
@@ -380,6 +346,9 @@ const data = {
   "photo": "/cv/profile.jpg",
   "print": "Drucken",
   "printDescription": "Druckt die aktuelle Seite und speichert sie als PDF",
+  "press": {
+    "title": "Presse & Medien"
+  },
   "role": "Executive Entrepreneur & Innovation Architect",
   "saveAsPdf": "Als PDF speichern",
   "skills": {

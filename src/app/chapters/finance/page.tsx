@@ -8,12 +8,15 @@ import MultiLineEuroChartClient from './MultiLineEuroChartClient';
 import WaterfallEuroChartClient from './WaterfallEuroChartClient';
 import TableSimple from '@/components/ui/TableSimple';
 import SectionDelay from '@/components/animation/SectionDelay';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CardTitle } from '@/components/ui/card';
+import ElegantCard from '@/components/ui/ElegantCard';
 import CountUp from '@/components/charts/CountUp';
 import { CheckCircle2, TrendingUp, BarChart3, CircleDollarSign } from 'lucide-react';
 import MiniSparkline from '@/components/charts/MiniSparkline';
 import MiniBar from '@/components/charts/MiniBar';
 import { KPI_ANIM_DURATION, KPI_BAR_HEIGHT, KPI_SPARK_HEIGHT, getKpiDelay, COUNTUP_DURATION_MS, getCountUpDelayMs } from '@/components/charts/kpiAnimation';
+import SectionHeader from '@/components/sections/SectionHeader';
+import SectionBody from '@/components/sections/SectionBody';
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
@@ -313,90 +316,90 @@ export default async function FinancePage() {
               { id: 'cagr', t: tBp('kpis.cagr'), v: tBp('kpisValues.cagr'), s: tBp('kpisSub.cagr') },
               { id: 'revenue2030', t: tBp('kpis.revenue2030'), v: tBp('kpisValues.revenue2030'), s: tBp('kpisSub.revenue2030') },
             ].map((k, i) => (
-              <div key={i} className="h-full">
-                <Card className="kpi-card kpi-card--hairline h-full bg-transparent shadow-none">
-                  <div className="kpi-card kpi-card--bm relative h-full rounded-2xl">
-                    <div className="kpi-card-content p-3 md:p-3.5 pb-4 md:pb-5">
-                      <div className="flex items-center gap-2 text-[10px] md:text-[11px] font-medium tracking-wide uppercase mb-2 text-[--color-foreground] dark:text-white">
-                        {(() => {
-                          const Icon = k.id === 'market2030' ? TrendingUp : k.id === 'cagr' ? BarChart3 : k.id === 'revenue2030' ? CircleDollarSign : CheckCircle2;
-                          return <Icon className="h-3.5 w-3.5 text-[--color-foreground-muted]" aria-hidden />;
-                        })()}
-                        <span>{k.t as unknown as string}</span>
-                      </div>
-                      {/* Visual-Slot: kleine Sparklines/Bars für Konsistenz */}
-                      <div className="mb-2.5 kpi-visual">
-                        {k.id === 'cagr' ? (
-                          <MiniBar
-                            data={[10, 18, 27, 35, 53]}
-                            height={KPI_BAR_HEIGHT}
-                            color={'var(--color-amber-500)'}
-                            bg={'rgba(245,158,11,0.12)'}
-                            delay={getKpiDelay(i)}
-                            duration={KPI_ANIM_DURATION}
-                            className="w-full"
-                          />
-                        ) : k.id === 'market2030' ? (
-                          <MiniSparkline
-                            data={[28, 32, 36, 40, 44]}
-                            height={KPI_SPARK_HEIGHT}
-                            delay={getKpiDelay(i)}
-                            duration={KPI_ANIM_DURATION}
-                            className="w-full"
-                            colorStart={'var(--color-emerald-500)'}
-                            colorEnd={'var(--color-sky-500)'}
-                            showArea={false}
-                            showDot
-                          />
-                        ) : k.id === 'revenue2030' ? (
-                          <MiniSparkline
-                            data={[18, 22, 27, 33, 38]}
-                            height={KPI_SPARK_HEIGHT}
-                            delay={getKpiDelay(i)}
-                            duration={KPI_ANIM_DURATION}
-                            className="w-full"
-                            colorStart={'var(--color-sky-500)'}
-                            colorEnd={'var(--color-violet-500)'}
-                            showArea={false}
-                            showDot
-                          />
-                        ) : (
-                          <div className="h-[18px]" />
-                        )}
-                      </div>
-                      <div className="text-center space-y-1">
-                        <div className="kpi-value-row font-bold text-slate-900 dark:text-white [font-feature-settings:'tnum'] [font-variant-numeric:tabular-nums] kpi-value">
-                          {(() => {
-                            const raw = String(k.v);
-                            const { to, prefix, suffix, decimals } = parseKpiValue(raw);
-                            const durationMs = COUNTUP_DURATION_MS;
-                            const delayMs = getCountUpDelayMs(i);
-                            // Jahr erkennen (reine 4-stellige Jahreszahl) und Gruppierung deaktivieren
-                            const isPureYear = /^\s*(?:19|20)\d{2}\s*$/.test(raw);
-                            return (
-                              <span className="whitespace-normal break-words leading-tight" title={raw}>
-                                <CountUp
-                                  to={to}
-                                  durationMs={durationMs}
-                                  delayMs={delayMs}
-                                  prefix={prefix ?? ''}
-                                  suffix={suffix ?? ''}
-                                  decimals={decimals ?? 0}
-                                  locale={locale.startsWith('de') ? 'de-DE' : 'en-US'}
-                                  useGrouping={!isPureYear}
-                                />
-                              </span>
-                            );
-                          })()}
-                        </div>
-                        <div className="kpi-sub one-line" title={k.s as unknown as string}>
-                          {k.s as unknown as string}
-                        </div>
-                      </div>
-                    </div>
+              <ElegantCard
+                key={i}
+                className="h-full"
+                innerClassName="relative h-full min-h-[156px] rounded-[12px] bg-[--color-surface] p-4 md:p-5 lg:p-6"
+                ariaLabel={`${k.t as string} KPI Card`}
+                role="group"
+              >
+                <div className="text-center">
+                  <div className="flex items-center justify-center gap-2 text-[10px] md:text-[11px] tracking-wide uppercase mb-2 text-[--color-foreground-muted]">
+                    {(() => {
+                      const Icon = k.id === 'market2030' ? TrendingUp : k.id === 'cagr' ? BarChart3 : k.id === 'revenue2030' ? CircleDollarSign : CheckCircle2;
+                      return <Icon className="h-3.5 w-3.5 text-[--color-foreground-muted]" aria-hidden />;
+                    })()}
+                    <span>{k.t as unknown as string}</span>
                   </div>
-                </Card>
-              </div>
+                  {/* Visual-Slot */}
+                  <div className="mb-3.5 kpi-visual">
+                    {k.id === 'cagr' ? (
+                      <MiniBar
+                        data={[10, 18, 27, 35, 53]}
+                        height={KPI_BAR_HEIGHT}
+                        color={'var(--color-amber-500)'}
+                        bg={'rgba(245,158,11,0.12)'}
+                        delay={getKpiDelay(i)}
+                        duration={KPI_ANIM_DURATION}
+                        className="w-full"
+                      />
+                    ) : k.id === 'market2030' ? (
+                      <MiniSparkline
+                        data={[28, 32, 36, 40, 44]}
+                        height={KPI_SPARK_HEIGHT}
+                        delay={getKpiDelay(i)}
+                        duration={KPI_ANIM_DURATION}
+                        className="w-full"
+                        colorStart={'var(--color-emerald-500)'}
+                        colorEnd={'var(--color-sky-500)'}
+                        showArea={false}
+                        showDot
+                      />
+                    ) : k.id === 'revenue2030' ? (
+                      <MiniSparkline
+                        data={[18, 22, 27, 33, 38]}
+                        height={KPI_SPARK_HEIGHT}
+                        delay={getKpiDelay(i)}
+                        duration={KPI_ANIM_DURATION}
+                        className="w-full"
+                        colorStart={'var(--color-sky-500)'}
+                        colorEnd={'var(--color-violet-500)'}
+                        showArea={false}
+                        showDot
+                      />
+                    ) : (
+                      <div className="h-[18px]" />
+                    )}
+                  </div>
+                  <div className="font-semibold text-[--color-foreground-strong] [font-feature-settings:'tnum'] [font-variant-numeric:tabular-nums] text-[15px] md:text-[16px] leading-snug kpi-value">
+                    {(() => {
+                      const raw = String(k.v);
+                      const { to, prefix, suffix, decimals } = parseKpiValue(raw);
+                      const durationMs = COUNTUP_DURATION_MS;
+                      const delayMs = getCountUpDelayMs(i);
+                      const isPureYear = /^\s*(?:19|20)\d{2}\s*$/.test(raw);
+                      return (
+                        <span className="whitespace-normal break-words" title={raw}>
+                          <CountUp
+                            to={to}
+                            durationMs={durationMs}
+                            delayMs={delayMs}
+                            prefix={prefix ?? ''}
+                            suffix={suffix ?? ''}
+                            decimals={decimals ?? 0}
+                            locale={locale.startsWith('de') ? 'de-DE' : 'en-US'}
+                            useGrouping={!isPureYear}
+                          />
+                        </span>
+                      );
+                    })()}
+                  </div>
+                  <div className="mx-auto mt-2 h-px w-8/12 bg-[--color-border-subtle]/25" aria-hidden />
+                  <div className="mt-1.5 text-[12px] md:text-[12.5px] text-[--color-foreground] opacity-85 one-line" title={k.s as unknown as string}>
+                    {k.s as unknown as string}
+                  </div>
+                </div>
+              </ElegantCard>
             ))}
           </div>
           {/* KPI-Badges unter den Karten – harmonisiert mit Kapitel 1 */}
@@ -446,31 +449,29 @@ export default async function FinancePage() {
         <span id="breakEven" className="sr-only" aria-hidden="true" />
         {breakEvenSeries.length > 0 && (
           <SectionDelay delayMs={400}>
-            <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
-              <CardHeader className="border-b-0 p-2.5">
-                <CardTitle title={locale.startsWith('de') ? 'Indikativ, interne Planung' : 'Indicative, internal planning'} className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
-                  {`${chapterIndex}.1 – ${tBp('headings.breakEven') as string}`}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-2.5 pt-1.5 md:pt-2.5 pb-5">
-                {(() => {
-                  const desc = tBp('figures.breakEvenDescription');
-                  return desc ? (
-                    <p className="mt-1.5 md:mt-2 text-sm leading-relaxed text-[--color-foreground-muted]">{desc as unknown as string}</p>
-                  ) : null;
-                })()}
-                <div className="mt-2.5 flex justify-center pb-5">
-                  <MultiLineEuroChartClient
-                    series={breakEvenSeries as any}
-                    ariaLabel={tBp('headings.breakEven') as string}
-                    responsive
-                    height={260}
-                    locale={locale}
-                    yTicksCount={5}
-                  />
-                </div>
-              </CardContent>
-            </Card>
+            <SectionHeader>
+              <CardTitle title={locale.startsWith('de') ? 'Indikativ, interne Planung' : 'Indicative, internal planning'} className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+                {`${chapterIndex}.1 – ${tBp('headings.breakEven') as string}`}
+              </CardTitle>
+            </SectionHeader>
+            {(() => {
+              const desc = tBp('figures.breakEvenDescription');
+              return desc ? (
+                <p className="mt-1 text-sm leading-relaxed text-[--color-foreground-muted]">{desc as unknown as string}</p>
+              ) : null;
+            })()}
+            <SectionBody>
+              <div className="flex justify-center">
+                <MultiLineEuroChartClient
+                  series={breakEvenSeries as any}
+                  ariaLabel={tBp('headings.breakEven') as string}
+                  responsive
+                  height={260}
+                  locale={locale}
+                  yTicksCount={5}
+                />
+              </div>
+            </SectionBody>
           </SectionDelay>
         )}
 
@@ -481,29 +482,25 @@ export default async function FinancePage() {
         <span id="capexOpex" className="sr-only" aria-hidden="true" />
         {(capexRows.length > 0 || opexRows.length > 0) && (
           <SectionDelay delayMs={1200}>
-            <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
-              <CardHeader className="border-b-0 p-2.5">
-                <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
-                  {`${chapterIndex}.3 – ${tBp('headings.capexOpex') as string}`}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-2.5 pt-1.5 md:pt-2.5 pb-5">
-                <div className="grid gap-3 md:grid-cols-2">
-                  {capexRows.length > 0 && (
-                    <div>
-                      <h4 className="text-[13px] md:text-[14px] font-medium mb-1 text-[--color-foreground]">CAPEX</h4>
-                      <TableSimple headers={capexOpexHeaders} rows={capexRows} animateRows stagger={0.03} zebra denseRows emphasizeFirstCol />
-                    </div>
-                  )}
-                  {opexRows.length > 0 && (
-                    <div>
-                      <h4 className="text-[13px] md:text-[14px] font-medium mb-1 text-[--color-foreground]">OPEX</h4>
-                      <TableSimple headers={capexOpexHeaders} rows={opexRows} animateRows stagger={0.03} zebra denseRows emphasizeFirstCol />
-                    </div>
-                  )}
+            <SectionHeader>
+              <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+                {`${chapterIndex}.3 – ${tBp('headings.capexOpex') as string}`}
+              </CardTitle>
+            </SectionHeader>
+            <div className="grid gap-3 md:grid-cols-2 mb-4 md:mb-6">
+              {capexRows.length > 0 && (
+                <div>
+                  <h4 className="text-[13px] md:text-[14px] font-medium mb-1 text-[--color-foreground]">CAPEX</h4>
+                  <TableSimple headers={capexOpexHeaders} rows={capexRows} animateRows stagger={0.03} zebra denseRows emphasizeFirstCol />
                 </div>
-              </CardContent>
-            </Card>
+              )}
+              {opexRows.length > 0 && (
+                <div>
+                  <h4 className="text-[13px] md:text-[14px] font-medium mb-1 text-[--color-foreground]">OPEX</h4>
+                  <TableSimple headers={capexOpexHeaders} rows={opexRows} animateRows stagger={0.03} zebra denseRows emphasizeFirstCol />
+                </div>
+              )}
+            </div>
           </SectionDelay>
         )}
 
@@ -511,24 +508,22 @@ export default async function FinancePage() {
         <span id="hardwareBreakdown" className="sr-only" aria-hidden="true" />
         {hwRows.length > 0 && (
           <SectionDelay delayMs={1600}>
-            <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
-              <CardHeader className="border-b-0 p-2.5">
-                <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
-                  {`${chapterIndex}.4 – ${hwTitle}`}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-2.5 pt-1.5 md:pt-2.5 pb-5">
-                <TableSimple
-                  headers={hwHeaders.length > 0 ? hwHeaders : capexOpexHeaders}
-                  rows={hwRows}
-                  animateRows
-                  stagger={0.03}
-                  zebra
-                  denseRows
-                  emphasizeFirstCol
-                />
-              </CardContent>
-            </Card>
+            <SectionHeader>
+              <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+                {`${chapterIndex}.4 – ${hwTitle}`}
+              </CardTitle>
+            </SectionHeader>
+            <SectionBody>
+              <TableSimple
+                headers={hwHeaders.length > 0 ? hwHeaders : capexOpexHeaders}
+                rows={hwRows}
+                animateRows
+                stagger={0.03}
+                zebra
+                denseRows
+                emphasizeFirstCol
+              />
+            </SectionBody>
           </SectionDelay>
         )}
 
@@ -536,69 +531,65 @@ export default async function FinancePage() {
         <span id="revenueStreams" className="sr-only" aria-hidden="true" />
         {revLabels.length > 0 && revSeries.length > 0 && (
           <SectionDelay delayMs={800}>
-            <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
-              <CardHeader className="border-b-0 p-2.5">
-                <CardTitle title={locale.startsWith('de') ? 'Indikativ, interne Planung' : 'Indicative, internal planning'} className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
-                  {`${chapterIndex}.5 – ${tBp('headings.revenueStreams') as string}`}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-2.5 pt-0 pb-5">
-                {revenueNarrative ? (
-                  <p className="mt-1 text-sm leading-relaxed text-[--color-foreground-muted]">{revenueNarrative}</p>
-                ) : null}
-                <div className="mt-2.5 md:mt-3.5">
-                  <RevenueMixChart
-                    labels={revLabels}
-                    series={revSeries as any}
-                    total={total}
-                    titleBar={tBp('headings.revenueStreams')}
-                    titleLine={locale.startsWith('de') ? 'Gesamtumsatz' : 'Total Revenue'}
-                    locale={locale}
-                    palette={brandPalette}
-                  />
-                </div>
-                {(() => {
-                  try {
-                    if (!Array.isArray(revLabels) || revLabels.length === 0 || !Array.isArray(revSeries) || revSeries.length === 0) return null;
-                    const li = revLabels.length - 1;
-                    const totals = revSeries.reduce((acc: number, s) => acc + (Number(s.values?.[li] ?? 0)), 0);
-                    if (!totals) return null;
-                    const parts = revSeries.map((s) => ({ name: s.name, pct: Math.round(((Number(s.values?.[li] ?? 0)) / totals) * 100) }));
-                    const line = parts.map((p) => `${p.name}: ${p.pct}%`).join(' • ');
-                    return (
-                      <div className="not-prose mt-2 text-[11px] md:text-[11.5px] text-center text-[--color-foreground-muted]">
-                        {line}
-                      </div>
-                    );
-                  } catch { return null; }
-                })()}
-              </CardContent>
-            </Card>
+            <SectionHeader>
+              <CardTitle title={locale.startsWith('de') ? 'Indikativ, interne Planung' : 'Indicative, internal planning'} className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+                {`${chapterIndex}.5 – ${tBp('headings.revenueStreams') as string}`}
+              </CardTitle>
+            </SectionHeader>
+            {revenueNarrative ? (
+              <p className="mt-1 text-sm leading-relaxed text-[--color-foreground-muted]">{revenueNarrative}</p>
+            ) : null}
+            <SectionBody>
+              <div className="flex justify-center">
+                <RevenueMixChart
+                  labels={revLabels}
+                  series={revSeries as any}
+                  total={total}
+                  titleBar={tBp('headings.revenueStreams')}
+                  titleLine={locale.startsWith('de') ? 'Gesamtumsatz' : 'Total Revenue'}
+                  locale={locale}
+                  palette={brandPalette}
+                />
+              </div>
+            </SectionBody>
+            {(() => {
+              try {
+                if (!Array.isArray(revLabels) || revLabels.length === 0 || !Array.isArray(revSeries) || revSeries.length === 0) return null;
+                const li = revLabels.length - 1;
+                const totals = revSeries.reduce((acc: number, s) => acc + (Number(s.values?.[li] ?? 0)), 0);
+                if (!totals) return null;
+                const parts = revSeries.map((s) => ({ name: s.name, pct: Math.round(((Number(s.values?.[li] ?? 0)) / totals) * 100) }));
+                const line = parts.map((p) => `${p.name}: ${p.pct}%`).join(' • ');
+                return (
+                  <div className="not-prose mt-1.5 text-[11px] md:text-[11.5px] text-center text-[--color-foreground-muted]">
+                    {line}
+                  </div>
+                );
+              } catch { return null; }
+            })()}
           </SectionDelay>
         )}
 
         {/* Use of Funds (Years) */}
         {uofHeaders.length > 0 && uofRows.length > 0 && (
           <SectionDelay delayMs={1200}>
-            <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
-              <CardHeader className="border-b-0 p-2.5">
-                <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
-                  {`${chapterIndex}.2 – ${tBp('headings.useOfFunds') as string}`}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-2.5 pt-0 pb-5">
-                <TableSimple
-                  headers={uofHeaders}
-                  rows={uofRows.map((r: any[]) => r.map((c) => (typeof c === 'number' ? nf.format(c) : String(c))))}
-                  className="mt-1.5 min-w-[640px] bg-transparent ring-0 shadow-none"
-                  animateRows
-                  rowVariant="fadeInUp"
-                  stagger={0.04}
-                  zebra
-                  denseRows
-                />
-              </CardContent>
-            </Card>
+            <SectionHeader>
+              <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+                {`${chapterIndex}.2 – ${tBp('headings.useOfFunds') as string}`}
+              </CardTitle>
+            </SectionHeader>
+            <SectionBody>
+              <TableSimple
+                headers={uofHeaders}
+                rows={uofRows.map((r: any[]) => r.map((c) => (typeof c === 'number' ? nf.format(c) : String(c))))}
+                className="mt-1.5 min-w-[640px] bg-transparent ring-0 shadow-none"
+                animateRows
+                rowVariant="fadeInUp"
+                stagger={0.04}
+                zebra
+                denseRows
+              />
+            </SectionBody>
           </SectionDelay>
         )}
 
@@ -606,31 +597,29 @@ export default async function FinancePage() {
         <span id="revenueVsCost" className="sr-only" aria-hidden="true" />
         {revCostSeries.length > 0 && (
           <SectionDelay delayMs={1600}>
-            <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
-              <CardHeader className="border-b-0 p-2.5">
-                <CardTitle title={locale.startsWith('de') ? 'Indikativ, interne Planung' : 'Indicative, internal planning'} className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
-                  {`${chapterIndex}.6 – ${tBp('headings.revenueVsCost') as string}`}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-2.5 pt-0 pb-5">
-                {(() => {
-                  const desc = tBp('figures.revenueVsCostDescription');
-                  return desc ? (
-                    <p className="mt-1 text-sm leading-relaxed text-[--color-foreground-muted]">{desc as unknown as string}</p>
-                  ) : null;
-                })()}
-                <div className="mt-2.5 flex justify-center pb-5">
-                  <MultiLineEuroChartClient
-                    series={revCostSeries as any}
-                    ariaLabel={tBp('headings.revenueVsCost') as string}
-                    responsive
-                    height={260}
-                    locale={locale}
-                    yTicksCount={5}
-                  />
-                </div>
-              </CardContent>
-            </Card>
+            <SectionHeader>
+              <CardTitle title={locale.startsWith('de') ? 'Indikativ, interne Planung' : 'Indicative, internal planning'} className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+                {`${chapterIndex}.6 – ${tBp('headings.revenueVsCost') as string}`}
+              </CardTitle>
+            </SectionHeader>
+            {(() => {
+              const desc = tBp('figures.revenueVsCostDescription');
+              return desc ? (
+                <p className="mt-1 text-sm leading-relaxed text-[--color-foreground-muted]">{desc as unknown as string}</p>
+              ) : null;
+            })()}
+            <SectionBody>
+              <div className="flex justify-center">
+                <MultiLineEuroChartClient
+                  series={revCostSeries as any}
+                  ariaLabel={tBp('headings.revenueVsCost') as string}
+                  responsive
+                  height={260}
+                  locale={locale}
+                  yTicksCount={5}
+                />
+              </div>
+            </SectionBody>
           </SectionDelay>
         )}
 
@@ -638,32 +627,30 @@ export default async function FinancePage() {
         <span id="cashFlow" className="sr-only" aria-hidden="true" />
         {cashFlowSeries.length > 0 && (
           <SectionDelay delayMs={2000}>
-            <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
-              <CardHeader className="border-b-0 p-2.5">
-                <CardTitle title={locale.startsWith('de') ? 'Indikativ, interne Planung' : 'Indicative, internal planning'} className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
-                  {`${chapterIndex}.7 – ${tBp('headings.cashFlow') as string}`}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-2.5 pt-0 pb-5">
-                {(() => {
-                  const desc = tBp('figures.cashFlowDescription');
-                  return desc ? (
-                    <p className="mt-1 text-sm leading-relaxed text-[--color-foreground-muted]">{desc as unknown as string}</p>
-                  ) : null;
-                })()}
-                <div className="mt-2.5 flex justify-center pb-5">
-                  <MultiLineEuroChartClient
-                    series={cashFlowSeries as any}
-                    ariaLabel={tBp('headings.cashFlow') as string}
-                    responsive
-                    height={260}
-                    showArea
-                    locale={locale}
-                    yTicksCount={5}
-                  />
-                </div>
-              </CardContent>
-            </Card>
+            <SectionHeader>
+              <CardTitle title={locale.startsWith('de') ? 'Indikativ, interne Planung' : 'Indicative, internal planning'} className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+                {`${chapterIndex}.7 – ${tBp('headings.cashFlow') as string}`}
+              </CardTitle>
+            </SectionHeader>
+            {(() => {
+              const desc = tBp('figures.cashFlowDescription');
+              return desc ? (
+                <p className="mt-1 text-sm leading-relaxed text-[--color-foreground-muted]">{desc as unknown as string}</p>
+              ) : null;
+            })()}
+            <SectionBody>
+              <div className="flex justify-center">
+                <MultiLineEuroChartClient
+                  series={cashFlowSeries as any}
+                  ariaLabel={tBp('headings.cashFlow') as string}
+                  responsive
+                  height={260}
+                  showArea
+                  locale={locale}
+                  yTicksCount={5}
+                />
+              </div>
+            </SectionBody>
           </SectionDelay>
         )}
 
@@ -671,13 +658,13 @@ export default async function FinancePage() {
         <span id="profitBridge" className="sr-only" aria-hidden="true" />
         {profitBridgeSteps.length > 0 && (
           <SectionDelay delayMs={2400}>
-            <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
-              <CardHeader className="border-b-0 p-2.5">
-                <CardTitle title={locale.startsWith('de') ? 'Indikativ, interne Planung' : 'Indicative, internal planning'} className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
-                  {`${chapterIndex}.8 – ${tBp('headings.profitBridge') as string}`}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-2.5 pt-0">
+            <SectionHeader>
+              <CardTitle title={locale.startsWith('de') ? 'Indikativ, interne Planung' : 'Indicative, internal planning'} className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+                {`${chapterIndex}.8 – ${tBp('headings.profitBridge') as string}`}
+              </CardTitle>
+            </SectionHeader>
+            <SectionBody>
+              <div className="flex justify-center">
                 <WaterfallEuroChartClient
                   steps={profitBridgeSteps as any}
                   ariaLabel={tBp('headings.profitBridge') as string}
@@ -686,8 +673,8 @@ export default async function FinancePage() {
                   locale={locale}
                   yTicksCount={5}
                 />
-              </CardContent>
-            </Card>
+              </div>
+            </SectionBody>
           </SectionDelay>
         )}
 
@@ -695,25 +682,23 @@ export default async function FinancePage() {
         <span id="ebitda" className="sr-only" aria-hidden="true" />
         {ebitdaHeaders.length > 0 && ebitdaRows.length > 0 && (
           <SectionDelay delayMs={2800}>
-            <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
-              <CardHeader className="border-b-0 p-2.5">
-                <CardTitle title={locale.startsWith('de') ? 'Indikativ, interne Planung' : 'Indicative, internal planning'} className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
-                  {`${chapterIndex}.9 – ${ebitdaTitle || (tBp('headings.plOverview') as string)}`}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-2.5 pt-0 pb-5">
-                <TableSimple
-                  headers={ebitdaHeaders}
-                  rows={ebitdaRows.map((r: any[]) => r.map((c) => (typeof c === 'number' ? nf.format(c) : String(c))))}
-                  className="mt-1.5 md:mt-2.5 min-w-[420px] bg-transparent ring-0 shadow-none"
-                  animateRows
-                  rowVariant="fadeInUp"
-                  stagger={0.04}
-                  zebra
-                  denseRows
-                />
-              </CardContent>
-            </Card>
+            <div className="mb-2">
+              <CardTitle title={locale.startsWith('de') ? 'Indikativ, interne Planung' : 'Indicative, internal planning'} className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+                {`${chapterIndex}.9 – ${ebitdaTitle || (tBp('headings.plOverview') as string)}`}
+              </CardTitle>
+            </div>
+            <div className="mb-4 md:mb-6">
+              <TableSimple
+                headers={ebitdaHeaders}
+                rows={ebitdaRows.map((r: any[]) => r.map((c) => (typeof c === 'number' ? nf.format(c) : String(c))))}
+                className="mt-1.5 md:mt-2.5 min-w-[420px] bg-transparent ring-0 shadow-none"
+                animateRows
+                rowVariant="fadeInUp"
+                stagger={0.04}
+                zebra
+                denseRows
+              />
+            </div>
           </SectionDelay>
         )}
 
@@ -721,23 +706,27 @@ export default async function FinancePage() {
         <span id="revenueForecast" className="sr-only" aria-hidden="true" />
         {Array.isArray(fin?.revenueForecast) && fin.revenueForecast.length > 0 && (
           <SectionDelay delayMs={3200}>
-            <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
-              <CardHeader className="border-b-0 p-2.5">
-                <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
-                  {`${chapterIndex}.10 – ${locale.startsWith('de') ? 'Umsatzprognose' : 'Revenue Forecast'}`}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-2.5 pt-0 pb-5">
-                <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                  {fin.revenueForecast.map((x: any, i: number) => (
-                    <div key={i} className="flex items-start gap-2 rounded-md border border-[--color-border-subtle] bg-[--muted]/10 p-2 md:p-2.5">
-                      <span aria-hidden className="h-4 w-4 mt-0.5 inline-flex items-center justify-center text-emerald-600">✓</span>
-                      <span className="text-[13px] md:text-[14px] leading-relaxed text-[--color-foreground]">{typeof x === 'string' ? x : String(x)}</span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            <div className="mb-2">
+              <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+                {`${chapterIndex}.10 – ${locale.startsWith('de') ? 'Umsatzprognose' : 'Revenue Forecast'}`}
+              </CardTitle>
+            </div>
+            <div className="grid gap-2 sm:gap-2.5 lg:gap-3 items-stretch sm:grid-cols-2 lg:grid-cols-3 mb-4 md:mb-6">
+              {fin.revenueForecast.map((x: any, i: number) => (
+                <ElegantCard
+                  key={i}
+                  className="h-full"
+                  innerClassName="relative h-full min-h-[64px] rounded-[12px] bg-[--color-surface] p-3 md:p-3.5"
+                  ariaLabel={`${tBp('headings.revenueForecast') as string} Item`}
+                  role="group"
+                >
+                  <div className="flex items-start gap-2">
+                    <span aria-hidden className="h-4 w-4 mt-0.5 inline-flex items-center justify-center text-emerald-600">✓</span>
+                    <span className="text-[13px] md:text-[14px] leading-relaxed text-[--color-foreground]">{typeof x === 'string' ? x : String(x)}</span>
+                  </div>
+                </ElegantCard>
+              ))}
+            </div>
           </SectionDelay>
         )}
 
@@ -745,25 +734,23 @@ export default async function FinancePage() {
         <span id="revenueTable" className="sr-only" aria-hidden="true" />
         {Array.isArray(fin?.revenueTable) && fin.revenueTable.length > 0 && (
           <SectionDelay delayMs={3600}>
-            <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
-              <CardHeader className="border-b-0 p-2.5">
-                <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
-                  {`${chapterIndex}.11 – ${locale.startsWith('de') ? 'Umsatztabelle' : 'Revenue Table'}`}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-2.5 pt-0 pb-5">
-                <TableSimple
-                  rows={fin.revenueTable.map((r: any[]) => r.map((c) => (typeof c === 'number' ? nf.format(c) : String(c))))}
-                  className="mt-1.5 md:mt-2.5 min-w-[520px] bg-transparent ring-0 shadow-none"
-                  animateRows
-                  rowVariant="fadeInUp"
-                  stagger={0.04}
-                  zebra
-                  denseRows
-                  emphasizeFirstCol
-                />
-              </CardContent>
-            </Card>
+            <div className="mb-2">
+              <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+                {`${chapterIndex}.11 – ${locale.startsWith('de') ? 'Umsatztabelle' : 'Revenue Table'}`}
+              </CardTitle>
+            </div>
+            <div className="mb-4 md:mb-6">
+              <TableSimple
+                rows={fin.revenueTable.map((r: any[]) => r.map((c) => (typeof c === 'number' ? nf.format(c) : String(c))))}
+                className="mt-1.5 md:mt-2.5 min-w-[520px] bg-transparent ring-0 shadow-none"
+                animateRows
+                rowVariant="fadeInUp"
+                stagger={0.04}
+                zebra
+                denseRows
+                emphasizeFirstCol
+              />
+            </div>
           </SectionDelay>
         )}
 
@@ -771,23 +758,27 @@ export default async function FinancePage() {
         <span id="fundraising" className="sr-only" aria-hidden="true" />
         {Array.isArray(fin?.capitalNeeds) && fin.capitalNeeds.length > 0 && (
           <SectionDelay delayMs={4000}>
-            <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
-              <CardHeader className="border-b-0 p-2.5">
-                <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
-                  {`${chapterIndex}.12 – ${tBp('headings.fundraising') as string}`}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-2.5 pt-0 pb-5">
-                <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                  {fin.capitalNeeds.map((x: any, i: number) => (
-                    <div key={i} className="flex items-start gap-2 rounded-md border border-[--color-border-subtle] bg-[--muted]/10 p-2 md:p-2.5">
-                      <CheckCircle2 aria-hidden className="h-4 w-4 mt-0.5 text-emerald-500 shrink-0" />
-                      <span className="text-[13px] md:text-[14px] leading-relaxed text-[--color-foreground]">{typeof x === 'string' ? x : String(x)}</span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            <div className="mb-2">
+              <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+                {`${chapterIndex}.12 – ${tBp('headings.fundraising') as string}`}
+              </CardTitle>
+            </div>
+            <div className="grid gap-2 sm:gap-2.5 lg:gap-3 items-stretch sm:grid-cols-2 lg:grid-cols-3 mb-4 md:mb-6">
+              {fin.capitalNeeds.map((x: any, i: number) => (
+                <ElegantCard
+                  key={i}
+                  className="h-full"
+                  innerClassName="relative h-full min-h-[64px] rounded-[12px] bg-[--color-surface] p-3 md:p-3.5"
+                  ariaLabel={`${tBp('headings.fundraising') as string} Item`}
+                  role="group"
+                >
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 aria-hidden className="h-4 w-4 mt-0.5 text-emerald-500 shrink-0" />
+                    <span className="text-[13px] md:text-[14px] leading-relaxed text-[--color-foreground]">{typeof x === 'string' ? x : String(x)}</span>
+                  </div>
+                </ElegantCard>
+              ))}
+            </div>
           </SectionDelay>
         )}
 
@@ -795,23 +786,27 @@ export default async function FinancePage() {
         <span id="capTable" className="sr-only" aria-hidden="true" />
         {Array.isArray(fin?.funding) && fin.funding.length > 0 && (
           <SectionDelay delayMs={4400}>
-            <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
-              <CardHeader className="border-b-0 p-2.5">
-                <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
-                  {`${chapterIndex}.13 – ${tBp('sections.capTable') as string}`}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-2.5 pt-0 pb-5">
-                <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                  {fin.funding.map((x: any, i: number) => (
-                    <div key={i} className="flex items-start gap-2 rounded-md border border-[--color-border-subtle] bg-[--muted]/10 p-2 md:p-2.5">
-                      <span aria-hidden className="h-4 w-4 mt-0.5 inline-flex items-center justify-center text-emerald-600">✓</span>
-                      <span className="text-[13px] md:text-[14px] leading-relaxed text-[--color-foreground]">{typeof x === 'string' ? x : String(x)}</span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            <div className="mb-2">
+              <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+                {`${chapterIndex}.13 – ${tBp('sections.capTable') as string}`}
+              </CardTitle>
+            </div>
+            <div className="grid gap-2 sm:gap-2.5 lg:gap-3 items-stretch sm:grid-cols-2 lg:grid-cols-3 mb-4 md:mb-6">
+              {fin.funding.map((x: any, i: number) => (
+                <ElegantCard
+                  key={i}
+                  className="h-full"
+                  innerClassName="relative h-full min-h-[64px] rounded-[12px] bg-[--color-surface] p-3 md:p-3.5"
+                  ariaLabel={`${tBp('sections.capTable') as string} Item`}
+                  role="group"
+                >
+                  <div className="flex items-start gap-2">
+                    <span aria-hidden className="h-4 w-4 mt-0.5 inline-flex items-center justify-center text-emerald-600">✓</span>
+                    <span className="text-[13px] md:text-[14px] leading-relaxed text-[--color-foreground]">{typeof x === 'string' ? x : String(x)}</span>
+                  </div>
+                </ElegantCard>
+              ))}
+            </div>
           </SectionDelay>
         )}
 
@@ -819,23 +814,27 @@ export default async function FinancePage() {
         <span id="projections" className="sr-only" aria-hidden="true" />
         {Array.isArray(fin?.fundingStrategy) && fin.fundingStrategy.length > 0 && (
           <SectionDelay delayMs={4800}>
-            <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
-              <CardHeader className="border-b-0 p-2.5">
-                <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
-                  {`${chapterIndex}.14 – ${tBp('headings.projections') as string}`}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-2.5 pt-1.5 md:pt-2.5 pb-5">
-                <div className="grid gap-1.5 sm:grid-cols-2 lg:grid-cols-3">
-                  {fin.fundingStrategy.map((x: any, i: number) => (
-                    <div key={i} className="flex items-start gap-2 rounded-md border border-[--color-border-subtle] bg-[--muted]/10 p-2 md:p-2.5">
-                      <span aria-hidden className="h-4 w-4 mt-0.5 inline-flex items-center justify-center text-emerald-600">✓</span>
-                      <span className="text-[13px] md:text-[14px] leading-relaxed text-[--color-foreground]">{typeof x === 'string' ? x : String(x)}</span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            <div className="mb-2">
+              <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+                {`${chapterIndex}.14 – ${tBp('headings.projections') as string}`}
+              </CardTitle>
+            </div>
+            <div className="grid gap-1.5 sm:gap-2.5 lg:gap-3 items-stretch sm:grid-cols-2 lg:grid-cols-3 mb-4 md:mb-6">
+              {fin.fundingStrategy.map((x: any, i: number) => (
+                <ElegantCard
+                  key={i}
+                  className="h-full"
+                  innerClassName="relative h-full min-h-[64px] rounded-[12px] bg-[--color-surface] p-3 md:p-3.5"
+                  ariaLabel={`${tBp('headings.projections') as string} Item`}
+                  role="group"
+                >
+                  <div className="flex items-start gap-2">
+                    <span aria-hidden className="h-4 w-4 mt-0.5 inline-flex items-center justify-center text-emerald-600">✓</span>
+                    <span className="text-[13px] md:text-[14px] leading-relaxed text-[--color-foreground]">{typeof x === 'string' ? x : String(x)}</span>
+                  </div>
+                </ElegantCard>
+              ))}
+            </div>
           </SectionDelay>
         )}
 
@@ -843,44 +842,42 @@ export default async function FinancePage() {
         <span id="submissionsPlan" className="sr-only" aria-hidden="true" />
         {Array.isArray((bpAny?.finance as any)?.submissionsPlan) && ((bpAny?.finance as any)?.submissionsPlan as any[]).length > 0 && (
           <SectionDelay delayMs={5000}>
-            <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
-              <CardHeader className="border-b-0 p-2.5">
-                <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
-                  {`${chapterIndex}.15 – ${tBp('headings.submissionsPlan') as string}`}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-2.5 pt-0 pb-5">
-                <TableSimple
-                  headers={[
-                    locale.startsWith('de') ? 'Programm' : 'Program',
-                    locale.startsWith('de') ? 'Agentur' : 'Agency',
-                    locale.startsWith('de') ? 'Partner?' : 'Partner?',
-                    locale.startsWith('de') ? 'Betrag' : 'Amount',
-                    locale.startsWith('de') ? 'Co‑Fin (%)' : 'Co‑fin (%)',
-                    locale.startsWith('de') ? 'Zeitraum' : 'Timeline',
-                    'WPs',
-                    locale.startsWith('de') ? 'Unterlagen' : 'Docs',
-                  ]}
-                  rows={((bpAny?.finance as any)?.submissionsPlan as any[]).map((p: any) => [
-                    String(p?.program ?? ''),
-                    String(p?.agency ?? ''),
-                    p?.partnerRequired ? (locale.startsWith('de') ? 'Ja' : 'Yes') : (locale.startsWith('de') ? 'Nein' : 'No'),
-                    String(p?.requestedAmount ?? ''),
-                    String(p?.cofinancingPct ?? ''),
-                    String(p?.timeline ?? ''),
-                    Array.isArray(p?.workPackages) ? p.workPackages.join(', ') : '',
-                    Array.isArray(p?.docs) ? p.docs.slice(0, 2).join(' • ') + (Array.isArray(p?.docs) && p.docs.length > 2 ? ' …' : '') : '',
-                  ])}
-                  animateRows
-                  rowVariant="fadeInUp"
-                  stagger={0.03}
-                  zebra
-                  denseRows
-                  emphasizeFirstCol
-                  className="mt-1.5 min-w-[720px] bg-transparent ring-0 shadow-none"
-                />
-              </CardContent>
-            </Card>
+            <div className="mb-2">
+              <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+                {`${chapterIndex}.15 – ${tBp('headings.submissionsPlan') as string}`}
+              </CardTitle>
+            </div>
+            <div className="mb-4 md:mb-6">
+              <TableSimple
+                headers={[
+                  locale.startsWith('de') ? 'Programm' : 'Program',
+                  locale.startsWith('de') ? 'Agentur' : 'Agency',
+                  locale.startsWith('de') ? 'Partner?' : 'Partner?',
+                  locale.startsWith('de') ? 'Betrag' : 'Amount',
+                  locale.startsWith('de') ? 'Co‑Fin (%)' : 'Co‑fin (%)',
+                  locale.startsWith('de') ? 'Zeitraum' : 'Timeline',
+                  'WPs',
+                  locale.startsWith('de') ? 'Unterlagen' : 'Docs',
+                ]}
+                rows={((bpAny?.finance as any)?.submissionsPlan as any[]).map((p: any) => [
+                  String(p?.program ?? ''),
+                  String(p?.agency ?? ''),
+                  p?.partnerRequired ? (locale.startsWith('de') ? 'Ja' : 'Yes') : (locale.startsWith('de') ? 'Nein' : 'No'),
+                  String(p?.requestedAmount ?? ''),
+                  String(p?.cofinancingPct ?? ''),
+                  String(p?.timeline ?? ''),
+                  Array.isArray(p?.workPackages) ? p.workPackages.join(', ') : '',
+                  Array.isArray(p?.docs) ? p.docs.slice(0, 2).join(' • ') + (Array.isArray(p?.docs) && p.docs.length > 2 ? ' …' : '') : '',
+                ])}
+                animateRows
+                rowVariant="fadeInUp"
+                stagger={0.03}
+                zebra
+                denseRows
+                emphasizeFirstCol
+                className="mt-1.5 min-w-[720px] bg-transparent ring-0 shadow-none"
+              />
+            </div>
           </SectionDelay>
         )}
 
@@ -888,38 +885,33 @@ export default async function FinancePage() {
         <span id="fundingSummary" className="sr-only" aria-hidden="true" />
         {Array.isArray((bpAny?.finance as any)?.submissionsPlan) && ((bpAny?.finance as any)?.submissionsPlan as any[]).length > 0 && estTotalBudget > 0 && (
           <SectionDelay delayMs={5200}>
-            <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
-              <CardHeader className="border-b-0 p-2.5">
-                <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
-                  {`${chapterIndex}.16 – ${locale.startsWith('de') ? 'Finanzierungsübersicht (indikativ)' : 'Funding summary (indicative)'}`}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-2.5 pt-0 pb-5">
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                  <div className="rounded-md border border-[--color-border-subtle] bg-[--muted]/10 p-3">
-                    <div className="text-[11px] md:text-[12px] text-[--color-foreground-muted]">{locale.startsWith('de') ? 'Gesamter Zuschuss (Mittelwerte)' : 'Total grants (midpoints)'}</div>
-                    <div className="text-[18px] md:text-[20px] font-semibold">€{nf.format(totalGrantsMid)}</div>
-                  </div>
-                  <div className="rounded-md border border-[--color-border-subtle] bg-[--muted]/10 p-3">
-                    <div className="text-[11px] md:text-[12px] text-[--color-foreground-muted]">{locale.startsWith('de') ? 'Geschätztes Gesamtbudget' : 'Estimated total budget'}</div>
-                    <div className="text-[18px] md:text-[20px] font-semibold">€{nf.format(estTotalBudget)}</div>
-                  </div>
-                  <div className="rounded-md border border-[--color-border-subtle] bg-[--muted]/10 p-3">
-                    <div className="text-[11px] md:text-[12px] text-[--color-foreground-muted]">{locale.startsWith('de') ? `Eigenmittel (${equityPct}%)` : `Equity (${equityPct}%)`}</div>
-                    <div className="text-[18px] md:text-[20px] font-semibold">€{nf.format(estEquity)}</div>
-                  </div>
-                  <div className="rounded-md border border-[--color-border-subtle] bg-[--muted]/10 p-3">
-                    <div className="text-[11px] md:text-[12px] text-[--color-foreground-muted]">{locale.startsWith('de') ? `Investoren (${investorPct}%)` : `Investors (${investorPct}%)`}</div>
-                    <div className="text-[18px] md:text-[20px] font-semibold">€{nf.format(estInvestors)}</div>
-                  </div>
-                </div>
-                <div className="mt-2 text-[11px] text-[--color-foreground-muted]">
-                  {locale.startsWith('de')
-                    ? 'Hinweis: Summen aus Bandbreiten (Mittelwerte), Gesamtbudget aus Zuschussquote abgeleitet.'
-                    : 'Note: Totals from midpoints of ranges; total budget derived from grants ratio.'}
-                </div>
-              </CardContent>
-            </Card>
+            <div className="mb-2">
+              <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+                {`${chapterIndex}.16 – ${locale.startsWith('de') ? 'Finanzierungsübersicht (indikativ)' : 'Funding summary (indicative)'}`}
+              </CardTitle>
+            </div>
+            <div className="grid gap-2.5 sm:gap-3 lg:gap-3.5 items-stretch sm:grid-cols-2 lg:grid-cols-4 mb-4 md:mb-6">
+              {[{label: locale.startsWith('de') ? 'Gesamter Zuschuss (Mittelwerte)' : 'Total grants (midpoints)', value: `€${nf.format(totalGrantsMid)}`},
+                {label: locale.startsWith('de') ? 'Geschätztes Gesamtbudget' : 'Estimated total budget', value: `€${nf.format(estTotalBudget)}`},
+                {label: locale.startsWith('de') ? `Eigenmittel (${equityPct}%)` : `Equity (${equityPct}%)`, value: `€${nf.format(estEquity)}`},
+                {label: locale.startsWith('de') ? `Investoren (${investorPct}%)` : `Investors (${investorPct}%)`, value: `€${nf.format(estInvestors)}`}].map((k, i) => (
+                <ElegantCard
+                  key={`fs-${i}`}
+                  className="h-full"
+                  innerClassName="relative h-full min-h-[72px] rounded-[12px] bg-[--color-surface] p-3 md:p-3.5"
+                  ariaLabel={`Funding Summary ${i+1}`}
+                  role="group"
+                >
+                  <div className="text-[11px] md:text-[12px] text-[--color-foreground-muted]">{k.label}</div>
+                  <div className="text-[18px] md:text-[20px] font-semibold">{k.value}</div>
+                </ElegantCard>
+              ))}
+            </div>
+            <div className="mt-2 text-[11px] text-[--color-foreground-muted]">
+              {locale.startsWith('de')
+                ? 'Hinweis: Summen aus Bandbreiten (Mittelwerte), Gesamtbudget aus Zuschussquote abgeleitet.'
+                : 'Note: Totals from midpoints of ranges; total budget derived from grants ratio.'}
+            </div>
           </SectionDelay>
         )}
 
@@ -927,20 +919,16 @@ export default async function FinancePage() {
         <span id="assumptions" className="sr-only" aria-hidden="true" />
         {Array.isArray(finAssumptions) && finAssumptions.length > 0 && (
           <SectionDelay delayMs={5600}>
-            <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
-              <CardHeader className="border-b-0 p-2.5">
-                <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
-                  {`${chapterIndex}.17 – ${locale.startsWith('de') ? 'Annahmen' : 'Assumptions'}`}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-2.5 pt-0 pb-3">
-                <ul className="list-none pl-0 space-y-1.5">
-                  {finAssumptions.map((a, i) => (
-                    <li key={`ass-${i}`} className="text-[13px] md:text-[14px] text-[--color-foreground] opacity-90 leading-relaxed">{a}</li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
+            <div className="mb-2">
+              <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+                {`${chapterIndex}.17 – ${locale.startsWith('de') ? 'Annahmen' : 'Assumptions'}`}
+              </CardTitle>
+            </div>
+            <ul className="list-none pl-0 space-y-1.5 mb-4 md:mb-6">
+              {finAssumptions.map((a, i) => (
+                <li key={`ass-${i}`} className="text-[13px] md:text-[14px] text-[--color-foreground] opacity-90 leading-relaxed">{a}</li>
+              ))}
+            </ul>
           </SectionDelay>
         )}
 
@@ -948,24 +936,22 @@ export default async function FinancePage() {
         <span id="assumptionsTable" className="sr-only" aria-hidden="true" />
         {Array.isArray(finAssumptionsTable?.headers) && finAssumptionsTable.headers!.length > 0 && Array.isArray(finAssumptionsTable?.rows) && finAssumptionsTable.rows!.length > 0 && (
           <SectionDelay delayMs={6000}>
-            <Card className="h-full bg-transparent shadow-none border-0 mb-4 md:mb-6">
-              <CardHeader className="border-b-0 p-2.5">
-                <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
-                  {`${chapterIndex}.18 – ${locale.startsWith('de') ? 'Annahmen (Tabelle)' : 'Assumptions (Table)'}`}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-2.5 pt-0 pb-5">
-                <TableSimple
-                  headers={finAssumptionsTable.headers as string[]}
-                  rows={finAssumptionsTable.rows as (string|number)[][]}
-                  animateRows
-                  stagger={0.03}
-                  zebra
-                  denseRows
-                  emphasizeFirstCol
-                />
-              </CardContent>
-            </Card>
+            <div className="mb-2">
+              <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+                {`${chapterIndex}.18 – ${locale.startsWith('de') ? 'Annahmen (Tabelle)' : 'Assumptions (Table)'}`}
+              </CardTitle>
+            </div>
+            <div className="mb-4 md:mb-6">
+              <TableSimple
+                headers={finAssumptionsTable.headers as string[]}
+                rows={finAssumptionsTable.rows as (string|number)[][]}
+                animateRows
+                stagger={0.03}
+                zebra
+                denseRows
+                emphasizeFirstCol
+              />
+            </div>
           </SectionDelay>
         )}
       </div>
