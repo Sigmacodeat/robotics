@@ -4,12 +4,19 @@ import { NextRequest, NextResponse } from 'next/server';
 // Lazy-Initialisierung, um Importzeit-Fehler (Edge) zu vermeiden.
 // Falls das Erstellen der Middleware Exceptions wirft, wird dies im Handler gefangen.
 let intlMiddleware: ReturnType<typeof createMiddleware> | null = null;
+let createIntlMw: typeof createMiddleware | null = null;
 
-export default function middleware(req: NextRequest) {
+export default async function middleware(req: NextRequest) {
   try {
     // Erzeuge die Middleware beim ersten Request (und reuse danach)
     if (!intlMiddleware) {
-      intlMiddleware = createMiddleware({
+      if (!createIntlMw) {
+        // Dynamischer Import verhindert Edge-Init-Probleme auf Modulebene
+        const mod = await import('next-intl/middleware');
+        createIntlMw = (mod && (mod.default as typeof createMiddleware)) ?? null;
+      }
+      const factory = createIntlMw ?? createMiddleware;
+      intlMiddleware = factory({
         locales: ['de', 'en'],
         // Align with src/i18n/request.ts (defaultLocale: 'de', localePrefix: 'as-needed')
         defaultLocale: 'de',
@@ -43,3 +50,4 @@ export const config = {
     '/((?!api|_next|_vercel|.*\\..*).*)'
   ]
 };
+
