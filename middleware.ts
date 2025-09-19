@@ -4,12 +4,6 @@ import { NextResponse } from 'next/server';
 let intlFactory: any | null = null;
 
 export default async function middleware(req: NextRequest) {
-  const pathname = req.nextUrl.pathname || '/';
-  // Nur für englische Locale-Pfade aktivieren; Standard-Locale 'de' ist ohne Prefix
-  if (!pathname.startsWith('/en')) {
-    return NextResponse.next();
-  }
-
   try {
     if (!intlFactory) {
       const mod = await import('next-intl/middleware');
@@ -25,7 +19,7 @@ export default async function middleware(req: NextRequest) {
     }
   } catch (err) {
     try {
-      console.error('[intl-middleware/en] failed', {
+      console.error('[intl-middleware] failed', {
         url: req.nextUrl?.href,
         method: req.method,
         error: err instanceof Error ? { name: err.name, message: err.message, stack: err.stack } : String(err)
@@ -36,7 +30,9 @@ export default async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  // Nur englische Locale-Pfade matchen; verhindert unnötige Edge-Ausführung
-  matcher: ['/en/:path*']
+  // Exclude Next.js internals, API routes and all files with an extension from i18n handling
+  matcher: [
+    '/((?!api|_next|_vercel|.*\\..*).*)'
+  ]
 };
 
