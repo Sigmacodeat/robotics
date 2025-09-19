@@ -1,8 +1,6 @@
 name: Vercel Deploy
 
 on:
-  push:
-    branches: [ main, root-clean ]
   workflow_dispatch:
 
 permissions:
@@ -23,13 +21,34 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Fail fast if Vercel secrets are missing
+        run: |
+          set -euo pipefail
+          missing=0
+          for v in VERCEL_TOKEN VERCEL_PROJECT_ID VERCEL_ORG_ID; do
+            if [ -z "${!v:-}" ]; then
+              echo "::error::Missing required secret: $v"
+              missing=1
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            echo "One or more Vercel secrets are missing. Add them under Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - name: Enable Corepack (pnpm)
+        run: corepack enable
+
+      - name: Activate pnpm version
+        run: corepack prepare pnpm@9.12.3 --activate
+
+      - name: Verify pnpm
+        run: pnpm -v
 
       - name: Verify Vercel CLI auth
         run: npx vercel --version
@@ -67,3 +86,4 @@ jobs:
             --project=$VERCEL_PROJECT_ID \
             --scope=$VERCEL_ORG_ID \
             --token=$VERCEL_TOKEN
+
