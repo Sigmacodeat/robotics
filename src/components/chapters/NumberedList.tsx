@@ -63,8 +63,8 @@ export function NumberedItem({
   };
 
   return (
-    <li className={`flex items-start gap-3 mb-1.5 ${className}`}>
-      <span className="text-gradient-accent font-medium text-xs shrink-0 w-[48px] md:w-[56px] text-right [font-variant-numeric:tabular-nums] [font-feature-settings:'tnum']">{num}</span>
+    <li className={`flex items-start gap-3 mb-1.5 md:mb-2 ${className}`}>
+      <span className="chapter-num font-medium text-xs shrink-0 w-[48px] md:w-[56px] text-right [font-variant-numeric:tabular-nums] [font-feature-settings:'tnum']">{num}</span>
       <span className="inline-flex items-start gap-2 flex-1 min-w-0">
         {Icon ? <Icon className="mt-[1px] h-4 w-4 text-[--color-foreground]" /> : null}
         <span className="min-w-0">

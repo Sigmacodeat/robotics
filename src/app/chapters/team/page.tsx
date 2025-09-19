@@ -7,7 +7,8 @@ import InViewFade from '@/components/animation/InViewFade';
 import Link from 'next/link';
 import { Percent, Clock, Rocket, LineChart, Linkedin, Globe, Mail } from 'lucide-react';
 import TableSimple from '@/components/ui/TableSimple';
-import { Card, CardContent, CardTitle } from '@/components/ui/card';
+import { CardTitle } from '@/components/ui/card';
+import ElegantCard from '@/components/ui/ElegantCard';
 import { NumberedList, NumberedItem } from '@components/chapters/NumberedList';
 
 export const dynamic = 'force-dynamic';
@@ -83,8 +84,7 @@ export default async function TeamPage() {
               {/* Kurzprofil-Karten der Führung / Gründer */}
               <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 justify-items-center">
                 <InViewFade as="div" delay={0.02}>
-                <Card elevated={false} className="bg-[--color-surface] rounded-2xl ring-1 ring-[--color-border-subtle]/50 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:bg-[--color-surface]/95">
-                  <CardContent className="py-5 md:py-6">
+                <ElegantCard className="mx-auto w-full max-w-[520px]" innerClassName="rounded-[14px] bg-[--color-surface] p-5 md:p-6">
                     <div className="flex items-center gap-4">
                       <div className="h-11 w-11 rounded-full bg-gradient-to-br from-[--color-surface-2] to-[--color-surface] ring-1 ring-[--color-border-subtle]/60 shadow-inner flex items-center justify-center text-[12px] font-medium text-[--color-foreground]" aria-hidden="true" role="presentation">MM</div>
                       <div>
@@ -127,12 +127,10 @@ export default async function TeamPage() {
                         </div>
                       )}
                     </div>
-                  </CardContent>
-                </Card>
+                </ElegantCard>
                 </InViewFade>
                 <InViewFade as="div" delay={0.055}>
-                <Card elevated={false} className="bg-[--color-surface] rounded-2xl ring-1 ring-[--color-border-subtle]/50 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:bg-[--color-surface]/95">
-                  <CardContent className="py-5 md:py-6">
+                <ElegantCard className="mx-auto w-full max-w-[520px]" innerClassName="rounded-[14px] bg-[--color-surface] p-5 md:p-6">
                     <div className="flex items-center gap-4">
                       <div className="h-11 w-11 rounded-full bg-gradient-to-br from-[--color-surface-2] to-[--color-surface] ring-1 ring-[--color-border-subtle]/60 shadow-inner flex items-center justify-center text-[12px] font-medium text-[--color-foreground]" aria-hidden="true" role="presentation">IM</div>
                       <div>
@@ -175,12 +173,10 @@ export default async function TeamPage() {
                         </div>
                       )}
                     </div>
-                  </CardContent>
-                </Card>
+                </ElegantCard>
                 </InViewFade>
                 <InViewFade as="div" delay={0.09}>
-                <Card elevated={false} className="bg-[--color-surface] rounded-2xl ring-1 ring-[--color-border-subtle]/50 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:bg-[--color-surface]/95">
-                  <CardContent className="py-5 md:py-6">
+                <ElegantCard className="mx-auto w-full max-w-[520px]" innerClassName="rounded-[14px] bg-[--color-surface] p-5 md:p-6">
                     <div className="flex items-center gap-4">
                       <div className="h-11 w-11 rounded-full bg-gradient-to-br from-[--color-surface-2] to-[--color-surface] ring-1 ring-[--color-border-subtle]/60 shadow-inner flex items-center justify-center text-[12px] font-medium text-[--color-foreground]" aria-hidden="true" role="presentation">AM</div>
                       <div>
@@ -223,8 +219,7 @@ export default async function TeamPage() {
                         </div>
                       )}
                     </div>
-                  </CardContent>
-                </Card>
+                </ElegantCard>
                 </InViewFade>
               </div>
             </section>
@@ -237,46 +232,38 @@ export default async function TeamPage() {
         <InViewFade as="section" delay={0.065} aria-labelledby="operating-model-heading">
           <h3 id="operating-model-heading" className="not-prose text-[14px] md:text-[16px] font-medium mb-2 text-[--color-foreground]">{`${sub()} – ${tBp('headings.teamOrg')}`}</h3>
           <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4 max-w-6xl mx-auto">
-            <Card elevated={false} className="bg-[--color-surface] rounded-2xl ring-1 ring-[--color-border-subtle]/40">
-              <CardContent className="py-3.5 md:py-4.5">
+            <ElegantCard className="h-full" innerClassName="rounded-[14px] bg-[--color-surface] p-4 md:p-5">
                 <CardTitle className="text-[13.5px] md:text-base tracking-tight">{tBp('headings.teamOrgCoreEngineering')}</CardTitle>
                 <NumberedList>
                   <NumberedItem num={`${chapterIndex}.4.1`}>AI/Robotik (Perception, Planning, Policies)</NumberedItem>
                   <NumberedItem num={`${chapterIndex}.4.2`}>Controls/Execution (Controller, HW‑Abstraktion)</NumberedItem>
                   <NumberedItem num={`${chapterIndex}.4.3`}>Safety (Guardrails, Evaluierungen)</NumberedItem>
                 </NumberedList>
-              </CardContent>
-            </Card>
-            <Card elevated={false} className="bg-[--color-surface] rounded-2xl ring-1 ring-[--color-border-subtle]/40">
-              <CardContent className="py-3.5 md:py-4.5">
+            </ElegantCard>
+            <ElegantCard className="h-full" innerClassName="rounded-[14px] bg-[--color-surface] p-4 md:p-5">
                 <CardTitle className="text-[13.5px] md:text-base tracking-tight">{tBp('headings.teamOrgPlatformCloud')}</CardTitle>
                 <NumberedList>
                   <NumberedItem num={`${chapterIndex}.4.4`}>Policy‑Hub, Tele‑Assist, Observability</NumberedItem>
                   <NumberedItem num={`${chapterIndex}.4.5`}>Edge &lt;10ms, Canary‑Rollouts, CI/CD</NumberedItem>
                   <NumberedItem num={`${chapterIndex}.4.6`}>Data/Telemetry, Compliance/Provenienz</NumberedItem>
                 </NumberedList>
-              </CardContent>
-            </Card>
-            <Card elevated={false} className="bg-[--color-surface] rounded-2xl ring-1 ring-[--color-border-subtle]/40">
-              <CardContent className="py-3.5 md:py-4.5">
+            </ElegantCard>
+            <ElegantCard className="h-full" innerClassName="rounded-[14px] bg-[--color-surface] p-4 md:p-5">
                 <CardTitle className="text-[13.5px] md:text-base tracking-tight">{tBp('headings.teamOrgProduct')}</CardTitle>
                 <NumberedList>
                   <NumberedItem num={`${chapterIndex}.4.7`}>App‑Store & SDK (DX, Templates)</NumberedItem>
                   <NumberedItem num={`${chapterIndex}.4.8`}>Roadmap, Priorisierung, UX</NumberedItem>
                   <NumberedItem num={`${chapterIndex}.4.9`}>Partner‑Enablement, Docs</NumberedItem>
                 </NumberedList>
-              </CardContent>
-            </Card>
-            <Card elevated={false} className="bg-[--color-surface] rounded-2xl ring-1 ring-[--color-border-subtle]/40">
-              <CardContent className="py-3.5 md:py-4.5">
+            </ElegantCard>
+            <ElegantCard className="h-full" innerClassName="rounded-[14px] bg-[--color-surface] p-4 md:p-5">
                 <CardTitle className="text-[13.5px] md:text-base tracking-tight">{tBp('headings.teamOrgGtmPartnerships')}</CardTitle>
                 <NumberedList>
                   <NumberedItem num={`${chapterIndex}.4.10`}>Design‑Partner, OEM/Integrator</NumberedItem>
                   <NumberedItem num={`${chapterIndex}.4.11`}>SLAs, Demos, Referenzen</NumberedItem>
                   <NumberedItem num={`${chapterIndex}.4.12`}>Rev‑Share, Developer‑Programm</NumberedItem>
                 </NumberedList>
-              </CardContent>
-            </Card>
+            </ElegantCard>
           </div>
         </InViewFade>
 
@@ -353,8 +340,7 @@ export default async function TeamPage() {
                 { title: 'FMV', value: 'jährlich (409A‑EU)', sub: 'Strike = FMV', Icon: LineChart },
               ].map((k, i) => (
                 <InViewFade as="div" key={i} delay={0.02 + i * 0.035}>
-                  <Card elevated={false} className="kpi-card kpi-card--compact kpi-card--hairline mx-auto w-full max-w-[360px] bg-[--color-surface] rounded-2xl ring-1 ring-[--color-border-subtle]/40 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:bg-[--color-surface]/95">
-                    <CardContent className="kpi-card-content text-center py-6 md:py-7 px-5">
+                  <ElegantCard className="mx-auto w-full max-w-[360px]" innerClassName="text-center rounded-[14px] bg-[--color-surface] py-6 md:py-7 px-5">
                       <div className="mx-auto mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-[--color-surface-2] ring-1 ring-[--color-border-subtle]/40">
                         <k.Icon className="h-5.5 w-5.5 text-[--color-foreground]" aria-hidden />
                       </div>
@@ -362,8 +348,7 @@ export default async function TeamPage() {
                       <div className="kpi-value-row mt-2.5 text-[28px] md:text-[34px] font-semibold tracking-tight text-gradient-subtle kpi-value">{k.value}</div>
                       <div className="mx-auto mt-5 h-px w-9/12 bg-[--color-border-subtle]/20"></div>
                       <div className="kpi-sub mt-3.5 text-[11px] md:text-xs text-[--color-foreground-muted]">{k.sub}</div>
-                    </CardContent>
-                  </Card>
+                  </ElegantCard>
                 </InViewFade>
               ))}
             </div>

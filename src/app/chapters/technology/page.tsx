@@ -4,7 +4,7 @@ import { getMessages } from '@/i18n/messages';
 import { chapters } from '../chapters.config';
 import { buildLocalePath } from '@/i18n/path';
 import InViewFade from '@/components/animation/InViewFade';
-import { Card } from '@/components/ui/card';
+import ElegantCard from '@/components/ui/ElegantCard';
 import MiniBar from '@/components/charts/MiniBar';
 import MiniDonut from '@/components/charts/MiniDonut';
 import MiniSparkline from '@/components/charts/MiniSparkline';
@@ -85,68 +85,70 @@ export default async function TechnologyPage() {
             ] as const;
             return cards.map((s, idx) => (
             <InViewFade key={`${String(s.label)}-${idx}`} delay={idx * 0.05} className="h-full">
-              <Card className="kpi-card kpi-card--spacious kpi-card--hairline h-full bg-transparent shadow-none hover:shadow-none transition-all duration-200">
-                <div className="kpi-card kpi-card--bm relative h-full rounded-2xl">
-                  <div className="kpi-card-content p-3 md:p-4 pb-7 md:pb-8">
-                    <div className="flex items-center gap-2 text-[10px] md:text-[11px] font-medium tracking-wide uppercase mb-2 text-[--color-foreground] dark:text-white">
-                      {(() => {
-                        const Icon = s.key === 'uptime' ? ShieldCheck : s.key === 'latency' ? Timer : s.key === 'build' ? Wrench : GraduationCap;
-                        return <Icon className="h-3.5 w-3.5 text-[--color-foreground-muted]" aria-hidden />;
-                      })()}
-                      <span>{s.label}</span>
-                    </div>
-                    <div className="mb-3 kpi-visual">
-                      {s.key === 'uptime' ? (
-                        <MiniDonut
-                          value={0.9999}
-                          color="#22c55e"
-                          bg="rgba(34,197,94,0.12)"
-                          delay={getKpiDelay(idx)}
-                          duration={KPI_ANIM_DURATION}
-                          className={KPI_DONUT_CLASS}
-                        />
-                      ) : s.key === 'latency' ? (
-                        <MiniBar
-                          data={[14, 12, 11, 10, 9]}
-                          color="#f59e0b"
-                          bg="rgba(245,158,11,0.12)"
-                          delay={getKpiDelay(idx)}
-                          duration={KPI_ANIM_DURATION}
-                          className="w-full"
-                          height={KPI_BAR_HEIGHT}
-                        />
-                      ) : s.key === 'build' ? (
-                        <MiniSparkline
-                          data={[12, 10, 9, 8, 8]}
-                          height={KPI_SPARK_HEIGHT}
-                          delay={getKpiDelay(idx)}
-                          duration={KPI_ANIM_DURATION}
-                          className="w-full"
-                          colorStart="#3b82f6"
-                          colorEnd="#22c55e"
-                          showArea={false}
-                          showDot
-                        />
-                      ) : (
-                        <MiniDonut
-                          value={0.375}
-                          color="#3b82f6"
-                          bg="rgba(59,130,246,0.1)"
-                          delay={getKpiDelay(idx)}
-                          duration={KPI_ANIM_DURATION}
-                          className={KPI_DONUT_CLASS}
-                        />
-                      )}
-                    </div>
-                    <div className="text-center space-y-1">
-                      <div className="kpi-value-row font-bold text-slate-900 dark:text-white [font-feature-settings:'tnum'] [font-variant-numeric:tabular-nums]">
-                        {s.value}
-                      </div>
-                      <div className="kpi-sub one-line">{s.sub}</div>
-                    </div>
+              <ElegantCard
+                className="h-full"
+                innerClassName="relative h-full rounded-[12px] bg-[--color-surface] p-4 md:p-5 lg:p-6"
+                ariaLabel={`${s.label} KPI Card`}
+                role="group"
+              >
+                <div className="text-center">
+                  <div className="flex items-center justify-center gap-2 text-[10px] md:text-[11px] tracking-wide uppercase mb-2 text-[--color-foreground-muted]">
+                    {(() => {
+                      const Icon = s.key === 'uptime' ? ShieldCheck : s.key === 'latency' ? Timer : s.key === 'build' ? Wrench : GraduationCap;
+                      return <Icon className="h-3.5 w-3.5 text-[--color-foreground-muted]" aria-hidden />;
+                    })()}
+                    <span>{s.label}</span>
                   </div>
+                  <div className="mb-3 kpi-visual">
+                    {s.key === 'uptime' ? (
+                      <MiniDonut
+                        value={0.9999}
+                        color="#22c55e"
+                        bg="rgba(34,197,94,0.12)"
+                        delay={getKpiDelay(idx)}
+                        duration={KPI_ANIM_DURATION}
+                        className={KPI_DONUT_CLASS}
+                      />
+                    ) : s.key === 'latency' ? (
+                      <MiniBar
+                        data={[14, 12, 11, 10, 9]}
+                        color="#f59e0b"
+                        bg="rgba(245,158,11,0.12)"
+                        delay={getKpiDelay(idx)}
+                        duration={KPI_ANIM_DURATION}
+                        className="w-full"
+                        height={KPI_BAR_HEIGHT}
+                      />
+                    ) : s.key === 'build' ? (
+                      <MiniSparkline
+                        data={[12, 10, 9, 8, 8]}
+                        height={KPI_SPARK_HEIGHT}
+                        delay={getKpiDelay(idx)}
+                        duration={KPI_ANIM_DURATION}
+                        className="w-full"
+                        colorStart="#3b82f6"
+                        colorEnd="#22c55e"
+                        showArea={false}
+                        showDot
+                      />
+                    ) : (
+                      <MiniDonut
+                        value={0.375}
+                        color="#3b82f6"
+                        bg="rgba(59,130,246,0.1)"
+                        delay={getKpiDelay(idx)}
+                        duration={KPI_ANIM_DURATION}
+                        className={KPI_DONUT_CLASS}
+                      />
+                    )}
+                  </div>
+                  <div className="font-semibold text-[--color-foreground-strong] [font-feature-settings:'tnum'] [font-variant-numeric:tabular-nums] text-[17px] md:text-[18px] leading-tight">
+                    {s.value}
+                  </div>
+                  <div className="mx-auto mt-2 h-px w-8/12 bg-[--color-border-subtle]/25" aria-hidden />
+                  <div className="mt-1.5 text-[12px] md:text-[12.5px] text-[--color-foreground] opacity-85 one-line">{s.sub}</div>
                 </div>
-              </Card>
+              </ElegantCard>
             </InViewFade>
             ));
           })()}
