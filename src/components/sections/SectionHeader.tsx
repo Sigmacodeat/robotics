@@ -8,6 +8,6 @@ export type SectionHeaderProps = {
 
 export default function SectionHeader({ children, className }: SectionHeaderProps) {
   return (
-    <div className={"mt-3 md:mt-4 mb-2 " + (className ?? "")}>{children}</div>
+    <div className={"mt-4 md:mt-5 mb-3 md:mb-4 " + (className ?? "")}>{children}</div>
   );
 }

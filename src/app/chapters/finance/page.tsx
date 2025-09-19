@@ -296,7 +296,7 @@ export default async function FinancePage() {
   
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 md:space-y-10">
       <div className="prose prose-sm max-w-none [font-feature-settings:'ss01','ss02','liga','clig','tnum']">
         <h1 className="section-title font-semibold tracking-tight leading-tight text-[--color-foreground-strong] text-[clamp(18px,2vw,22px)]">
           {chapterTitle}
@@ -450,7 +450,7 @@ export default async function FinancePage() {
         {breakEvenSeries.length > 0 && (
           <SectionDelay delayMs={400}>
             <SectionHeader>
-              <CardTitle title={locale.startsWith('de') ? 'Indikativ, interne Planung' : 'Indicative, internal planning'} className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+              <CardTitle title={locale.startsWith('de') ? 'Indikativ, interne Planung' : 'Indicative, internal planning'} className="not-prose text-[28px] md:text-[32px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
                 {`${chapterIndex}.1 – ${tBp('headings.breakEven') as string}`}
               </CardTitle>
             </SectionHeader>
@@ -474,6 +474,8 @@ export default async function FinancePage() {
             </SectionBody>
           </SectionDelay>
         )}
+        {/* Einheitlicher Abstand zwischen Sektionen */}
+        <div aria-hidden className="not-prose my-8 md:my-12" />
 
         {/* Use of Funds (Years) */}
         <span id="useOfFunds" className="sr-only" aria-hidden="true" />
@@ -483,7 +485,7 @@ export default async function FinancePage() {
         {(capexRows.length > 0 || opexRows.length > 0) && (
           <SectionDelay delayMs={1200}>
             <SectionHeader>
-              <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+              <CardTitle className="not-prose text-[28px] md:text-[32px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
                 {`${chapterIndex}.3 – ${tBp('headings.capexOpex') as string}`}
               </CardTitle>
             </SectionHeader>
@@ -509,7 +511,7 @@ export default async function FinancePage() {
         {hwRows.length > 0 && (
           <SectionDelay delayMs={1600}>
             <SectionHeader>
-              <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+              <CardTitle className="not-prose text-[28px] md:text-[32px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
                 {`${chapterIndex}.4 – ${hwTitle}`}
               </CardTitle>
             </SectionHeader>
@@ -532,7 +534,7 @@ export default async function FinancePage() {
         {revLabels.length > 0 && revSeries.length > 0 && (
           <SectionDelay delayMs={800}>
             <SectionHeader>
-              <CardTitle title={locale.startsWith('de') ? 'Indikativ, interne Planung' : 'Indicative, internal planning'} className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+              <CardTitle title={locale.startsWith('de') ? 'Indikativ, interne Planung' : 'Indicative, internal planning'} className="not-prose text-[28px] md:text-[32px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
                 {`${chapterIndex}.5 – ${tBp('headings.revenueStreams') as string}`}
               </CardTitle>
             </SectionHeader>
@@ -561,7 +563,7 @@ export default async function FinancePage() {
                 const parts = revSeries.map((s) => ({ name: s.name, pct: Math.round(((Number(s.values?.[li] ?? 0)) / totals) * 100) }));
                 const line = parts.map((p) => `${p.name}: ${p.pct}%`).join(' • ');
                 return (
-                  <div className="not-prose mt-1.5 text-[11px] md:text-[11.5px] text-center text-[--color-foreground-muted]">
+                  <div className="not-prose mt-1.5 mb-3 md:mb-4 text-[11px] md:text-[11.5px] text-center text-[--color-foreground-muted]">
                     {line}
                   </div>
                 );
@@ -574,7 +576,7 @@ export default async function FinancePage() {
         {uofHeaders.length > 0 && uofRows.length > 0 && (
           <SectionDelay delayMs={1200}>
             <SectionHeader>
-              <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+              <CardTitle className="not-prose text-[28px] md:text-[32px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
                 {`${chapterIndex}.2 – ${tBp('headings.useOfFunds') as string}`}
               </CardTitle>
             </SectionHeader>
@@ -595,10 +597,12 @@ export default async function FinancePage() {
 
         {/* Revenue vs. Costs */}
         <span id="revenueVsCost" className="sr-only" aria-hidden="true" />
+        {/* Großer Abstand vor nächster Sektion */}
+        <div aria-hidden className="not-prose my-8 md:my-12" />
         {revCostSeries.length > 0 && (
           <SectionDelay delayMs={1600}>
             <SectionHeader>
-              <CardTitle title={locale.startsWith('de') ? 'Indikativ, interne Planung' : 'Indicative, internal planning'} className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+              <CardTitle title={locale.startsWith('de') ? 'Indikativ, interne Planung' : 'Indicative, internal planning'} className="not-prose text-[28px] md:text-[32px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
                 {`${chapterIndex}.6 – ${tBp('headings.revenueVsCost') as string}`}
               </CardTitle>
             </SectionHeader>
@@ -625,10 +629,12 @@ export default async function FinancePage() {
 
         {/* Cash Flow */}
         <span id="cashFlow" className="sr-only" aria-hidden="true" />
+        {/* Großer Abstand vor nächster Sektion */}
+        <div aria-hidden className="not-prose my-8 md:my-12" />
         {cashFlowSeries.length > 0 && (
           <SectionDelay delayMs={2000}>
             <SectionHeader>
-              <CardTitle title={locale.startsWith('de') ? 'Indikativ, interne Planung' : 'Indicative, internal planning'} className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+              <CardTitle title={locale.startsWith('de') ? 'Indikativ, interne Planung' : 'Indicative, internal planning'} className="not-prose text-[28px] md:text-[32px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
                 {`${chapterIndex}.7 – ${tBp('headings.cashFlow') as string}`}
               </CardTitle>
             </SectionHeader>
@@ -656,10 +662,12 @@ export default async function FinancePage() {
 
         {/* Profit Bridge (Waterfall) */}
         <span id="profitBridge" className="sr-only" aria-hidden="true" />
+        {/* Großer Abstand vor nächster Sektion */}
+        <div aria-hidden className="not-prose my-8 md:my-12" />
         {profitBridgeSteps.length > 0 && (
           <SectionDelay delayMs={2400}>
             <SectionHeader>
-              <CardTitle title={locale.startsWith('de') ? 'Indikativ, interne Planung' : 'Indicative, internal planning'} className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+              <CardTitle title={locale.startsWith('de') ? 'Indikativ, interne Planung' : 'Indicative, internal planning'} className="not-prose text-[28px] md:text-[32px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
                 {`${chapterIndex}.8 – ${tBp('headings.profitBridge') as string}`}
               </CardTitle>
             </SectionHeader>
@@ -680,10 +688,12 @@ export default async function FinancePage() {
 
         {/* EBITDA by Year */}
         <span id="ebitda" className="sr-only" aria-hidden="true" />
+        {/* Großer Abstand vor nächster Sektion */}
+        <div aria-hidden className="not-prose my-8 md:my-12" />
         {ebitdaHeaders.length > 0 && ebitdaRows.length > 0 && (
           <SectionDelay delayMs={2800}>
             <div className="mb-2">
-              <CardTitle title={locale.startsWith('de') ? 'Indikativ, interne Planung' : 'Indicative, internal planning'} className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+              <CardTitle title={locale.startsWith('de') ? 'Indikativ, interne Planung' : 'Indicative, internal planning'} className="not-prose text-[28px] md:text-[32px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
                 {`${chapterIndex}.9 – ${ebitdaTitle || (tBp('headings.plOverview') as string)}`}
               </CardTitle>
             </div>
@@ -704,10 +714,12 @@ export default async function FinancePage() {
 
         {/* Revenue Forecast */}
         <span id="revenueForecast" className="sr-only" aria-hidden="true" />
+        {/* Großer Abstand vor nächster Sektion */}
+        <div aria-hidden className="not-prose my-8 md:my-12" />
         {Array.isArray(fin?.revenueForecast) && fin.revenueForecast.length > 0 && (
           <SectionDelay delayMs={3200}>
             <div className="mb-2">
-              <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+              <CardTitle className="not-prose text-[28px] md:text-[32px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
                 {`${chapterIndex}.10 – ${locale.startsWith('de') ? 'Umsatzprognose' : 'Revenue Forecast'}`}
               </CardTitle>
             </div>
@@ -735,7 +747,7 @@ export default async function FinancePage() {
         {Array.isArray(fin?.revenueTable) && fin.revenueTable.length > 0 && (
           <SectionDelay delayMs={3600}>
             <div className="mb-2">
-              <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+              <CardTitle className="not-prose text-[28px] md:text-[32px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
                 {`${chapterIndex}.11 – ${locale.startsWith('de') ? 'Umsatztabelle' : 'Revenue Table'}`}
               </CardTitle>
             </div>
@@ -759,7 +771,7 @@ export default async function FinancePage() {
         {Array.isArray(fin?.capitalNeeds) && fin.capitalNeeds.length > 0 && (
           <SectionDelay delayMs={4000}>
             <div className="mb-2">
-              <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+              <CardTitle className="not-prose text-[28px] md:text-[32px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
                 {`${chapterIndex}.12 – ${tBp('headings.fundraising') as string}`}
               </CardTitle>
             </div>
@@ -787,7 +799,7 @@ export default async function FinancePage() {
         {Array.isArray(fin?.funding) && fin.funding.length > 0 && (
           <SectionDelay delayMs={4400}>
             <div className="mb-2">
-              <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+              <CardTitle className="not-prose text-[28px] md:text-[32px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
                 {`${chapterIndex}.13 – ${tBp('sections.capTable') as string}`}
               </CardTitle>
             </div>
@@ -815,7 +827,7 @@ export default async function FinancePage() {
         {Array.isArray(fin?.fundingStrategy) && fin.fundingStrategy.length > 0 && (
           <SectionDelay delayMs={4800}>
             <div className="mb-2">
-              <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+              <CardTitle className="not-prose text-[28px] md:text-[32px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
                 {`${chapterIndex}.14 – ${tBp('headings.projections') as string}`}
               </CardTitle>
             </div>
@@ -843,7 +855,7 @@ export default async function FinancePage() {
         {Array.isArray((bpAny?.finance as any)?.submissionsPlan) && ((bpAny?.finance as any)?.submissionsPlan as any[]).length > 0 && (
           <SectionDelay delayMs={5000}>
             <div className="mb-2">
-              <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+              <CardTitle className="not-prose text-[28px] md:text-[32px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
                 {`${chapterIndex}.15 – ${tBp('headings.submissionsPlan') as string}`}
               </CardTitle>
             </div>
@@ -886,7 +898,7 @@ export default async function FinancePage() {
         {Array.isArray((bpAny?.finance as any)?.submissionsPlan) && ((bpAny?.finance as any)?.submissionsPlan as any[]).length > 0 && estTotalBudget > 0 && (
           <SectionDelay delayMs={5200}>
             <div className="mb-2">
-              <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+              <CardTitle className="not-prose text-[28px] md:text-[32px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
                 {`${chapterIndex}.16 – ${locale.startsWith('de') ? 'Finanzierungsübersicht (indikativ)' : 'Funding summary (indicative)'}`}
               </CardTitle>
             </div>
@@ -920,7 +932,7 @@ export default async function FinancePage() {
         {Array.isArray(finAssumptions) && finAssumptions.length > 0 && (
           <SectionDelay delayMs={5600}>
             <div className="mb-2">
-              <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+              <CardTitle className="not-prose text-[28px] md:text-[32px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
                 {`${chapterIndex}.17 – ${locale.startsWith('de') ? 'Annahmen' : 'Assumptions'}`}
               </CardTitle>
             </div>
@@ -937,7 +949,7 @@ export default async function FinancePage() {
         {Array.isArray(finAssumptionsTable?.headers) && finAssumptionsTable.headers!.length > 0 && Array.isArray(finAssumptionsTable?.rows) && finAssumptionsTable.rows!.length > 0 && (
           <SectionDelay delayMs={6000}>
             <div className="mb-2">
-              <CardTitle className="not-prose text-[13px] md:text-[15px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
+              <CardTitle className="not-prose text-[28px] md:text-[32px] leading-tight font-semibold tracking-tight text-[--color-foreground]">
                 {`${chapterIndex}.18 – ${locale.startsWith('de') ? 'Annahmen (Tabelle)' : 'Assumptions (Table)'}`}
               </CardTitle>
             </div>

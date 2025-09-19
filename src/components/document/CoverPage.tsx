@@ -6,6 +6,7 @@ import { useTranslations, useFormatter, useLocale } from 'next-intl';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Store, Sparkles } from 'lucide-react';
 import ElegantCard from '@/components/ui/ElegantCard';
+import RobotIcon from '@/components/ui/RobotIcon';
 import { Sora } from 'next/font/google';
 
 // Kräftige, seriöse Display-Schrift
@@ -137,13 +138,7 @@ const CoverPage: React.FC<CoverPageProps> = ({ preview = false, versionOverride 
                       {/* Erste Titelzeile mit Robo-Icon links */}
                       <span className="block">
                         <span className="inline-flex items-center justify-center gap-2.5">
-                          <Image
-                            src="/icon-512.svg"
-                            alt="SIGMACODE Logo"
-                            width={22}
-                            height={22}
-                            className="h-[22px] w-[22px] rounded-[4px] shadow-[0_0_0_1px_color-mix(in_oklab,var(--color-border-subtle)_60%,transparent)]"
-                          />
+                          <RobotIcon size="md" strokeWidth={2} stroke="currentColor" />
                           <span>{main}</span>
                         </span>
                       </span>

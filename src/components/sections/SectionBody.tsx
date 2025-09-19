@@ -8,7 +8,7 @@ export type SectionBodyProps = {
 
 export default function SectionBody({ children, className }: SectionBodyProps) {
   return (
-    <div className={(className ? className + " " : "") + "mb-4 md:mb-6"}>
+    <div className={(className ? className + " " : "") + "mb-5 md:mb-7"}>
       {children}
     </div>
   );

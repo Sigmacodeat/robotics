@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { useMessages, useTranslations } from "next-intl";
 import { z } from "zod";
 import TimelineEventCard from "@/components/chapters/timeline/TimelineEventCard";
@@ -129,6 +129,7 @@ export const CVTimeline: React.FC<CVTimelineProps> = ({ items, compact, compactL
   const searchParams = useSearchParams();
   // Deck nur ab md-Viewport aktiv (mobile vertikal)
   const [isDeck, setIsDeck] = useState<boolean>(false);
+  const prefersReduced = useReducedMotion();
   useEffect(() => {
     const mq = typeof window !== 'undefined' ? window.matchMedia('(min-width: 768px)') : null;
     const update = () => {
@@ -267,6 +268,23 @@ export const CVTimeline: React.FC<CVTimelineProps> = ({ items, compact, compactL
   }, [data, segment]);
 
   const headingId = "cv-timeline-heading";
+
+  // Bounce/Wow Variants (nur wenn nicht prefersReduced)
+  const springEnter = {
+    type: 'spring' as const,
+    stiffness: 260,
+    damping: 22,
+    mass: 0.9,
+    bounce: 0.35,
+  };
+  const bounceLeft = {
+    hidden: { opacity: 0, x: -24, y: 12, rotate: -1.5 },
+    visible: { opacity: 1, x: 0, y: 0, rotate: 0 },
+  } as const;
+  const bounceRight = {
+    hidden: { opacity: 0, x: 24, y: 12, rotate: 1.5 },
+    visible: { opacity: 1, x: 0, y: 0, rotate: 0 },
+  } as const;
 
   // Deck-Ref
   const deckRef = useRef<HTMLUListElement>(null);
@@ -449,11 +467,14 @@ export const CVTimeline: React.FC<CVTimelineProps> = ({ items, compact, compactL
                       {/* Linke Spalte (für gerade idx) */}
                       <div className={`md:col-start-1 ${idx % 2 === 0 ? '' : 'md:invisible md:opacity-0'} flex flex-col items-end`}>
                         {idx % 2 === 0 && (
-                          <div className="w-full md:max-w-[92%]">
-                            <div className="mb-2 md:mb-2.5 flex w-full justify-end" id={periodId}>
-                              <span className="sr-only">{t('period', { default: 'Zeitraum' })}: </span>
-                              <CVPeriodBadges period={item.period} />
-                            </div>
+                          <motion.div
+                            className="w-full md:max-w-[92%]"
+                            {...(!prefersReduced ? { initial: 'hidden', whileInView: 'visible' as const } : { initial: false })}
+                            viewport={{ once: true, amount: 0.35, margin: '-12% 0px -12% 0px' }}
+                            variants={bounceLeft}
+                            transition={prefersReduced ? { duration: 0 } : { ...springEnter, delay: Math.min(idx * 0.02, 0.12) }}
+                            style={{ transformOrigin: '5% 50%' }}
+                          >
                             <TimelineEventCard
                               size={size}
                               title={item.title}
@@ -462,9 +483,14 @@ export const CVTimeline: React.FC<CVTimelineProps> = ({ items, compact, compactL
                               kind={getKind(item)}
                               bulletsId={`${itemId}-bullets`}
                               headerUnderline="none"
+                              periodBadges={
+                                <span id={periodId} aria-label={t('period', { default: 'Zeitraum' })}>
+                                  <CVPeriodBadges period={item.period} />
+                                </span>
+                              }
                               rightAside={
                                 (() => {
-                                  const matches = item.period.match(/\\d{4}/g);
+                                  const matches = item.period.match(/\d{4}/g);
                                   if (matches && matches.length >= 2) {
                                     return <TimelineSparkline title={item.title} {...(item.subtitle ? { subtitle: item.subtitle } : {})} xLabels={[matches[0], matches[matches.length-1]] as [string, string]} />;
                                   }
@@ -473,23 +499,34 @@ export const CVTimeline: React.FC<CVTimelineProps> = ({ items, compact, compactL
                               }
                               asidePosition={'right'}
                             />
-                          </div>
+                          </motion.div>
                         )}
                       </div>
 
-                      {/* Mittlere Spalte: Marker */}
+                      {/* Mittlere Spalte: Marker */
+                      }
                       <div className="relative hidden md:block md:col-start-2">
-                        <div className="absolute left-1/2 top-2 -translate-x-1/2 w-3 h-3 rounded-full bg-[--color-background] ring-2 ring-[--color-border]" aria-hidden />
+                        <motion.div
+                          className="absolute left-1/2 top-2 -translate-x-1/2 w-3 h-3 rounded-full bg-[--color-background] ring-2 ring-[--color-border]"
+                          aria-hidden
+                          initial={prefersReduced ? false : { scale: 0.6, opacity: 0.0 }}
+                          whileInView={prefersReduced ? {} : { scale: 1, opacity: 1 }}
+                          viewport={{ once: true, amount: 0.6, margin: '-30% 0px -30% 0px' }}
+                          transition={prefersReduced ? { duration: 0 } : { ...springEnter, delay: 0.05 }}
+                        />
                       </div>
 
                       {/* Rechte Spalte (für ungerade idx) */}
                       <div className={`md:col-start-3 ${idx % 2 === 1 ? '' : 'md:invisible md:opacity-0'}`}>
                         {idx % 2 === 1 && (
-                          <div className="w-full md:max-w-[92%]">
-                            <div className="mb-2 md:mb-2.5 flex w-full justify-start" id={periodId}>
-                              <span className="sr-only">{t('period', { default: 'Zeitraum' })}: </span>
-                              <CVPeriodBadges period={item.period} />
-                            </div>
+                          <motion.div
+                            className="w-full md:max-w-[92%]"
+                            {...(!prefersReduced ? { initial: 'hidden', whileInView: 'visible' as const } : { initial: false })}
+                            viewport={{ once: true, amount: 0.35, margin: '-12% 0px -12% 0px' }}
+                            variants={bounceRight}
+                            transition={prefersReduced ? { duration: 0 } : { ...springEnter, delay: Math.min(idx * 0.02, 0.12) }}
+                            style={{ transformOrigin: '95% 50%' }}
+                          >
                             <TimelineEventCard
                               size={size}
                               title={item.title}
@@ -498,9 +535,14 @@ export const CVTimeline: React.FC<CVTimelineProps> = ({ items, compact, compactL
                               kind={getKind(item)}
                               bulletsId={`${itemId}-bullets`}
                               headerUnderline="none"
+                              periodBadges={
+                                <span id={periodId} aria-label={t('period', { default: 'Zeitraum' })}>
+                                  <CVPeriodBadges period={item.period} />
+                                </span>
+                              }
                               rightAside={
                                 (() => {
-                                  const matches = item.period.match(/\\d{4}/g);
+                                  const matches = item.period.match(/\d{4}/g);
                                   if (matches && matches.length >= 2) {
                                     return <TimelineSparkline title={item.title} {...(item.subtitle ? { subtitle: item.subtitle } : {})} xLabels={[matches[0], matches[matches.length-1]] as [string, string]} />;
                                   }
@@ -509,16 +551,13 @@ export const CVTimeline: React.FC<CVTimelineProps> = ({ items, compact, compactL
                               }
                               asidePosition={'left'}
                             />
-                          </div>
+                          </motion.div>
                         )}
                       </div>
 
                       {/* Mobile: einspaltig – Card vollflächig */}
                       <div className="md:hidden col-span-full">
-                        <div className="mb-2 md:mb-2.5 flex w-full justify-center" id={`${periodId}-m`}>
-                          <span className="sr-only">{t('period', { default: 'Zeitraum' })}: </span>
-                          <CVPeriodBadges period={item.period} />
-                          <motion.div
+                        <motion.div
                             role="article"
                             tabIndex={0}
                             aria-labelledby={`${titleId} ${periodId}`}
@@ -536,10 +575,6 @@ export const CVTimeline: React.FC<CVTimelineProps> = ({ items, compact, compactL
                               if (e.key === 'End') { e.preventDefault(); const last = document.querySelector(`[data-cv-idx='${dataFiltered.length - 1}']`) as HTMLElement | null; last?.focus(); }
                             }}
                           >
-                            <div className="mb-2 md:mb-2.5 flex w-full justify-end" id={periodId}>
-                              <span className="sr-only">{t('period', { default: 'Zeitraum' })}: </span>
-                              <CVPeriodBadges period={item.period} />
-                            </div>
                             <TimelineEventCard
                               size={size}
                               title={item.title}
@@ -548,9 +583,14 @@ export const CVTimeline: React.FC<CVTimelineProps> = ({ items, compact, compactL
                               kind={getKind(item)}
                               bulletsId={`${itemId}-bullets`}
                               headerUnderline="none"
+                              periodBadges={
+                                <span id={periodId} aria-label={t('period', { default: 'Zeitraum' })}>
+                                  <CVPeriodBadges period={item.period} />
+                                </span>
+                              }
                               rightAside={
                                 (() => {
-                                  const matches = item.period.match(/\\d{4}/g);
+                                  const matches = item.period.match(/\d{4}/g);
                                   if (matches && matches.length >= 2) {
                                     return <TimelineSparkline title={item.title} {...(item.subtitle ? { subtitle: item.subtitle } : {})} xLabels={[matches[0], matches[matches.length-1]] as [string, string]} />;
                                   }
@@ -561,7 +601,6 @@ export const CVTimeline: React.FC<CVTimelineProps> = ({ items, compact, compactL
                             />
                           </motion.div>
                         </div>
-                      </div>
                     </div>
                   </div>
                 )}
@@ -585,7 +624,7 @@ export const CVTimeline: React.FC<CVTimelineProps> = ({ items, compact, compactL
             {currentIdx < Math.max(0, dataFiltered.length - 1) && (
               <button
                 type="button"
-                className="inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-full ring-1 ring-[--color-border-subtle] bg-[--color-surface]/70 backdrop-blur-[2px] text-[--color-foreground] shadow-sm"
+                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full ring-1 ring-[var(--color-border-subtle)] bg-[var(--color-surface)]/70 backdrop-blur-[2px] text-[--color-foreground] shadow-sm"
                 onClick={() => {
                   try { (navigator as any)?.vibrate?.(10); } catch {}
                   const next = sectionRef.current?.querySelector(`[data-cv-idx='${currentIdx + 1}']`) as HTMLElement | null;

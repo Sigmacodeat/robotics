@@ -124,7 +124,8 @@ export default async function LebenslaufRedirect() {
       <div className="hidden print:block">
         <CVCoverPage />
       </div>
-      <main id="content" role="main" className="min-h-screen bg-[--color-background] py-4 md:py-8">
+      {/* Lokaler Wrapper statt zweitem <main>: verhindert Doppel-Container & Zentrierungsfehler */}
+      <div id="content" className="min-h-screen bg-[--color-background] py-4 md:py-8">
       {/* Structured data for SEO */}
       <CVJsonLd locale={locale} sameAs={sameAs} />
       {/* Main Frame */}
@@ -350,7 +351,7 @@ export default async function LebenslaufRedirect() {
           </div>
         );
       })()}
-      </main>
+      </div>
       {/* Print-only closing/contact page */}
       <div className="hidden print:block">
         <ClosingPage />

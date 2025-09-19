@@ -17,12 +17,21 @@ export default function middleware(req: NextRequest) {
       });
     }
     return intlMiddleware(req);
-  } catch {
+  } catch (err) {
     // Fail-safe: never bring the site down due to middleware errors.
     // Note: Edge logs for this catch are visible in Vercel Function logs.
+    try {
+      // Edge Runtime: console.error ist erlaubt und wird in Vercel Function Logs angezeigt
+      console.error('[intl-middleware] invocation failed', {
+        url: req.nextUrl?.href,
+        method: req.method,
+        error: err instanceof Error ? { name: err.name, message: err.message, stack: err.stack } : String(err)
+      });
+    } catch {}
     const res = NextResponse.next();
     // Diagnose-Header hilft beim Erkennen, dass der Fallback gegriffen hat
     res.headers.set('x-intl-mw-fallback', '1');
+    res.headers.set('x-intl-mw-url', req.nextUrl?.pathname || 'n/a');
     return res;
   }
 }

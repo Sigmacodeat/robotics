@@ -3,7 +3,8 @@
 import React from "react";
 import Image from "next/image";
 import { useTranslations, useFormatter, useLocale } from "next-intl";
-import { MapPin, Bot } from "lucide-react";
+import { MapPin } from "lucide-react";
+import RobotIcon from "@/components/ui/RobotIcon";
 
 export default function CVCoverPage() {
   const t = useTranslations("cv");
@@ -33,7 +34,7 @@ export default function CVCoverPage() {
         <div>
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-[--color-foreground-strong]">
             <span className="inline-flex items-center gap-3 align-middle">
-              <Bot className="h-[28px] w-[28px] md:h-[36px] md:w-[36px] text-[--color-foreground] opacity-90" aria-hidden />
+              <RobotIcon size="lg" stroke="currentColor" strokeWidth={2} className="text-[--color-foreground] opacity-90" />
               <span>{t("pageTitle", { default: "Ismet Mesic" })}</span>
             </span>
           </h1>

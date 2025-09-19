@@ -18,9 +18,11 @@ export type TimelineEventCardProps = TimelineCommonProps & {
   kind?: 'work' | 'education';
   /** Position der Statistik/Aside innerhalb der Card (lg+): links oder rechts */
   asidePosition?: 'left' | 'right';
+  /** Optional: Perioden-Badges rechts im Header inline anzeigen */
+  periodBadges?: React.ReactNode;
 };
 
-export default function TimelineEventCard({ title, subtitle, bullets, size = 'md', headerUnderline = 'blue', rightAside, bulletsId, kind, asidePosition = 'right' }: TimelineEventCardProps) {
+export default function TimelineEventCard({ title, subtitle, bullets, size = 'md', headerUnderline = 'blue', rightAside, bulletsId, kind, asidePosition = 'right', periodBadges }: TimelineEventCardProps) {
   const underlineClass = headerUnderline === 'none'
     ? ''
     : headerUnderline === 'blue'
@@ -120,15 +122,23 @@ export default function TimelineEventCard({ title, subtitle, bullets, size = 'md
             transition={{ ...defaultTransition, delay: 0 + jitter * 0.5 }}
             className={`${asidePosition === 'left' ? 'order-2 lg:order-2 lg:pl-5' : 'order-1 lg:pr-5'} min-w-0 flex flex-col justify-center w-full`}
           >
-            {/* Titel + Untertitel (kompakt) */}
+            {/* Titel + Perioden-Badges inline, Untertitel darunter */}
             <div className={`${underlineClass} pb-1.5 md:pb-2`}>
-              <CardTitle className={`${titleSize} leading-[1.12] md:leading-[1.08] text-[--color-foreground-strong] font-semibold tracking-[-0.015em] md:tracking-[-0.01em] [text-wrap:balance] ${fullWidthVisual ? 'text-center' : ''}`}>
-                <span className="inline-flex items-center gap-2.5">
-                  {kind === 'work' && <Briefcase aria-hidden className="shrink-0 h-[1.3em] w-[1.3em] opacity-95 align-middle" />}
-                  {kind === 'education' && <GraduationCap aria-hidden className="shrink-0 h-[1.3em] w-[1.3em] opacity-95 align-middle" />}
-                  <span className="[hyphens:auto]">{title}</span>
-                </span>
-              </CardTitle>
+              <div className={`flex items-center ${fullWidthVisual ? 'justify-center' : 'justify-between'} gap-2 min-w-0`}>
+                <CardTitle className={`${titleSize} leading-[1.12] md:leading-[1.08] text-[--color-foreground-strong] font-semibold tracking-[-0.015em] md:tracking-[-0.01em] [text-wrap:balance]`}
+                >
+                  <span className="inline-flex items-center gap-2.5">
+                    {kind === 'work' && <Briefcase aria-hidden className="shrink-0 h-[1.3em] w-[1.3em] opacity-95 align-middle" />}
+                    {kind === 'education' && <GraduationCap aria-hidden className="shrink-0 h-[1.3em] w-[1.3em] opacity-95 align-middle" />}
+                    <span className="[hyphens:auto]">{title}</span>
+                  </span>
+                </CardTitle>
+                {periodBadges ? (
+                  <div className={`shrink-0 ${fullWidthVisual ? 'hidden' : 'flex'}`}>
+                    {periodBadges}
+                  </div>
+                ) : null}
+              </div>
               {subtitle ? (
                 <p className={`${size === 'sm' ? 'text-[12px] md:text:[12.5px]' : size === 'md' ? 'text-[12.5px] md:text-[13px]' : 'text-[13px] md:text-[13.5px]'} text-[--color-foreground]/90 mt-0.5 font-medium leading-[1.45] [hyphens:auto] ${fullWidthVisual ? 'text-center' : ''}`}>{subtitle}</p>
               ) : null}
